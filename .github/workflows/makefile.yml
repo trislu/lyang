@@ -20,7 +20,7 @@ jobs:
       uses: leafo/gh-actions-lua@v9.1.0
       with:
         # The version of Lua to install, must be available on https://www.lua.org/ftp/ or http://luajit.org/download.html
-        luaVersion: 5.1# optional, default is 5.4
+        luaVersion: 5.1
         # Command line flags passed to make when building Lua
         #luaCompileFlags: # optional
         # Set to 'false' to skip restoring .lua from cache and always compile it

@@ -22,21 +22,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 
---local addon = require('addon')
-
 return function ()
-    local buf = {}
+    local buf = nil
     local b = {
         load = function(filename)
             local fd = io.open(filename, 'r')
             local text = fd:read('*a')
             local len = string.len(text)
+            buf = {}
             for i = 1, len do
                 table.insert(buf, string.sub(text, i, i))
             end
         end,
+        loadstring = function(str)
+            local len = string.len(str)
+            buf = {}
+            for i = 1, len do
+                table.insert(buf, string.sub(str, i, i))
+            end
+        end,
         at = function (pos)
-            -- statements
             return buf[pos + 1]
         end,
         sub = function(start_pos, end_pos)
@@ -44,13 +49,10 @@ return function ()
         end,
         len = function()
             return #buf
+        end,
+        clear = function()
+            buf = {}
         end
     }
-    --[[ the buffer should be fast enough
-    if addon.custom_buffer then
-        -- if custom_buffer is implemented via addon
-        return addon.custom_buffer
-    end
-    ]]
     return b
 end

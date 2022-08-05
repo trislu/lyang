@@ -40,7 +40,7 @@ function test_sub()
     assert_equal('usage', b.sub(0, 4))
 end
 
-function test_at(params)
+function test_at()
     -- statements
     local b = buffer()
     b.load("Makefile")
@@ -50,6 +50,22 @@ function test_at(params)
     assert_equal('g', b.at(3))
     assert_equal('e', b.at(4))
     assert_equal(':', b.at(5))
+end
+
+function test_loadstring()
+    -- statements
+    local b = buffer()
+    local str = 'hello world'
+    b.loadstring(str)
+    assert_equal(str, b.sub(0, b.len() - 1))
+end
+
+function test_clear()
+    local b = buffer()
+    local str = 'hello world'
+    b.loadstring(str)
+    b.clear()
+    assert_equal(b.len(), 0)
 end
 
 lunit.main(...)

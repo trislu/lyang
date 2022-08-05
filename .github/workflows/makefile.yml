@@ -4,13 +4,15 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - 'src/*'
-      - 'test/*'
+      - '.github/**'
+      - 'src/**'
+      - 'test/**'
   pull_request:
     branches: [ "main" ]
     paths:
-      - 'src/*'
-      - 'test/*'
+      - '.github/**'
+      - 'src/**'
+      - 'test/**'
 
 jobs:
   build:

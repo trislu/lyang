@@ -28,10 +28,6 @@ local _type = nil
 local _sep = nil
 
 local init = function()
-    if _sep then
-        -- already initialized
-        return
-    end
     _sep = package.config:sub(1, 1)
     if '\\' == _sep then
         _type = WINDOWS

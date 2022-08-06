@@ -20,6 +20,7 @@
     "customizations": {
         "vscode": {
             "extensions": [
+                "EditorConfig.EditorConfig",
                 "liwangqian.luacoderassist",
                 "ms-vscode.cpptools-extension-pack"
             ]

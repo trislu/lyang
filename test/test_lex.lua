@@ -19,7 +19,7 @@ local token = require('token')
 
 -- global env will be broke by lunit
 require('lunit')
-module( "test_buffer", lunit.testcase)
+module('test_buffer', lunit.testcase)
 
 function test_unquoted_string()
     local b = buffer()
@@ -30,7 +30,7 @@ function test_unquoted_string()
     while true do
         local tk = lexer.next_token()
         if tk then
-            tokens[#tokens+1] = tk
+            tokens[#tokens + 1] = tk
         else
             break
         end
@@ -45,14 +45,14 @@ end
 
 function test_single_quoted_string()
     local b = buffer()
-    local str = 'hello \'world\''
+    local str = "hello 'world'"
     b.loadstring(str)
     local lexer = lex(b)
     local tokens = {}
     while true do
         local tk = lexer.next_token()
         if tk then
-            tokens[#tokens+1] = tk
+            tokens[#tokens + 1] = tk
         else
             break
         end
@@ -74,7 +74,7 @@ function test_double_quoted_string()
     while true do
         local tk = lexer.next_token()
         if tk then
-            tokens[#tokens+1] = tk
+            tokens[#tokens + 1] = tk
         else
             break
         end
@@ -96,7 +96,7 @@ function test_single_character()
     while true do
         local tk = lexer.next_token()
         if tk then
-            tokens[#tokens+1] = tk
+            tokens[#tokens + 1] = tk
         else
             break
         end
@@ -119,7 +119,7 @@ function test_line_comment()
     while true do
         local tk = lexer.next_token()
         if tk then
-            tokens[#tokens+1] = tk
+            tokens[#tokens + 1] = tk
         else
             break
         end
@@ -138,9 +138,10 @@ end
 
 function test_block_comment()
     local b = buffer()
-    local str = [[
+    local str =
+        [[
             hello
-            /* 
+            /*
                 skip this block
             */
             "world";
@@ -151,7 +152,7 @@ function test_block_comment()
     while true do
         local tk = lexer.next_token()
         if tk then
-            tokens[#tokens+1] = tk
+            tokens[#tokens + 1] = tk
         else
             break
         end

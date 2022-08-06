@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
-
 local validate_option = function(option)
     if 'table' == type(option) then
         if #option == 0 then
@@ -38,9 +37,9 @@ local validate_option = function(option)
                 error('invalid option : action must be one of "store"|"store_true"|"store_false"')
             end
             local valid_nargs = {
-                ['*']=1,
-                ['+']=2,
-                ['?']=3
+                ['*'] = 1,
+                ['+'] = 2,
+                ['?'] = 3
             }
             if option.nargs and not (('number' == type(option.nargs)) or valid_nargs[option.nargs]) then
                 error('invalid option : nargs must be one of number|"?"|"*"|"+"')
@@ -72,19 +71,19 @@ local m = {
                 option_list[#option_list + 1] = o
                 -- iterate [1] [2] ... to store argument with its option name
                 for _, option_name in ipairs(o) do
-                    if not string.match(option_name, "^(%-%-?)[^%-]+") then
-                        error('invalid option name: "'..option_name..'", must start with "-" or "--"')
+                    if not string.match(option_name, '^(%-%-?)[^%-]+') then
+                        error('invalid option name: "' .. option_name .. '", must start with "-" or "--"')
                     end
                     -- create option table for option-key-searching
                     option_search_table[option_name] = o
                 end
             end,
             print_usage = function()
-                print("Usage: lyang [file] [options]")
-                print("Available options:")
+                print('Usage: lyang [file] [options]')
+                print('Available options:')
                 for _, option in ipairs(option_list) do
-                    local names = option[1] .. (option[2] and (", " .. option[2]) or "")
-                    print("  " .. names .. "\t" .. option.help)
+                    local names = option[1] .. (option[2] and (', ' .. option[2]) or '')
+                    print('  ' .. names .. '\t' .. option.help)
                 end
             end,
             parse_args = function(arglist)
@@ -97,48 +96,57 @@ local m = {
                     if option then
                         -- option does exists
                         local action = option.action
-                        if action == "store_true" then
+                        if action == 'store_true' then
                             -- store true to the result with option.dest as key
                             result[option.dest] = true
-                        elseif action == "store_false" then
+                        elseif action == 'store_false' then
                             -- store false to the result with option.dest as key
                             result[option.dest] = false
-                        elseif action == "store" or action == nil then
+                        elseif action == 'store' or action == nil then
                             -- parse nargs
                             local nargs = {}
                             -- repeat parse next arguments
-                            while (index+1 <= #arglist) and (not string.match(arglist[index+1], "^(%-%-?)[^%-]+")) do
-                                nargs[#nargs + 1] = arglist[index+1]
+                            while (index + 1 <= #arglist) and (not string.match(arglist[index + 1], '^(%-%-?)[^%-]+')) do
+                                nargs[#nargs + 1] = arglist[index + 1]
                                 index = index + 1
                             end
                             -- check if nargs is valid
                             if option.nargs then
                                 if 'number' == type(option.nargs) then
                                     if #nargs ~= option.nargs then
-                                        error('option "'.._arg..'" expect '..tostring(option.nargs)..' arguments while '..tostring(nargs)..' given')
+                                        error(
+                                            'option "' ..
+                                                _arg ..
+                                                    '" expect ' ..
+                                                        tostring(option.nargs) ..
+                                                            ' arguments while ' .. tostring(nargs) .. ' given'
+                                        )
                                     end
                                 elseif '?' == option.nargs then
                                     if #nargs > 1 then
-                                        error('option "'.._arg..'" expect 0 or 1 argument while '..tostring(nargs)..' given')
+                                        error(
+                                            'option "' ..
+                                                _arg .. '" expect 0 or 1 argument while ' .. tostring(nargs) .. ' given'
+                                        )
                                     end
                                 elseif '+' == option.nargs then
                                     if #nargs < 1 then
-                                        error('option "'.._arg..'" expect 1 or more argument while 0 given')
+                                        error('option "' .. _arg .. '" expect 1 or more argument while 0 given')
                                     end
                                 elseif '*' == option.nargs then
                                     -- good
                                 else
-                                    error('option "'.._arg..'" invalid nargs '..option.nargs)
+                                    error('option "' .. _arg .. '" invalid nargs ' .. option.nargs)
                                 end
                             else
-                                error('option "'.._arg..'" claims store without nargs')
+                                error('option "' .. _arg .. '" claims store without nargs')
                             end
                             result[option.dest] = nargs
                         end
                     else
-                        if string.match(_arg, "^(%-%-?)[^%-]+") then
+                        if string.match(_arg, '^(%-%-?)[^%-]+') then
                             -- '_arg' seem to fit the option format
-                            error("invalid option: " .. _arg)
+                            error('invalid option: ' .. _arg)
                         end
                         -- push '_arg' as positional arguments
                         result[#result + 1] = _arg
@@ -152,11 +160,11 @@ local m = {
         }
         -- add default options
         parser.add_argument {
-            "-h",
-            "--help",
-            action = "store_true",
-            dest = "help",
-            help = "Display this information"
+            '-h',
+            '--help',
+            action = 'store_true',
+            dest = 'help',
+            help = 'Display this information'
         }
         return parser
     end

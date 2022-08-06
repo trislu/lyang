@@ -9,7 +9,7 @@ local genv = {
     getfenv = getfenv,
     pcall = pcall,
     print = print,
-    setfenv = setfenv,
+    setfenv = setfenv
 }
 
 local buffer = require('buffer')
@@ -18,7 +18,7 @@ local token = require('token')
 
 -- global env will be broke by lunit
 require('lunit')
-module( "test_scanner", lunit.testcase)
+module('test_scanner', lunit.testcase)
 
 function test_create()
     assert_function(scanner)
@@ -28,29 +28,29 @@ end
 
 function test_next()
     local b = buffer()
-    b.loadstring("hello world")
+    b.loadstring('hello world')
     local s = scanner(b)
     for i = 1, b.len() do
         -- statements
         local ch = s.next()
-        assert_equal(ch, b.at(i-1))
+        assert_equal(ch, b.at(i - 1))
     end
     assert_nil(s.next())
 end
 
 function test_peek()
     local b = buffer()
-    b.loadstring("hello world")
+    b.loadstring('hello world')
     local s = scanner(b)
     assert_equal('h', s.peek())
 end
 
 function test_peek2()
     local b = buffer()
-    b.loadstring("hello world")
+    b.loadstring('hello world')
     local s1 = scanner(b)
     assert_equal('he', s1.peek2())
-    b.loadstring("d")
+    b.loadstring('d')
     local s2 = scanner(b)
     assert_equal(1, b.len())
     --assert_nil(s2.peek2())
@@ -58,7 +58,7 @@ end
 
 function test_make_token()
     local b = buffer()
-    b.loadstring("hello world")
+    b.loadstring('hello world')
     local s = scanner(b)
     local ch = s.next() -- h
     s.consume() -- point to 'h'

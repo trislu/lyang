@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
-
 local token = require('token')
 
 return function(buf)
@@ -51,7 +50,7 @@ return function(buf)
             end
             return n
         end,
-        peek = function ()
+        peek = function()
             if nil == cur then
                 return buffer.at(0)
             elseif cur >= buffer.len() then
@@ -59,7 +58,7 @@ return function(buf)
             end
             return buffer.at(cur + 1)
         end,
-        peek2 = function ()
+        peek2 = function()
             if buffer.len() < 2 then
                 return nil
             elseif nil == cur then
@@ -74,7 +73,7 @@ return function(buf)
         end,
         make_token = function(t)
             -- make
-            return token.create(t, con, cur-con, line, column)
+            return token.create(t, con, cur - con, line, column)
         end
     }
     return s

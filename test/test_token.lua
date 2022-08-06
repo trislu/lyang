@@ -9,14 +9,14 @@ local genv = {
     getfenv = getfenv,
     pcall = pcall,
     print = print,
-    setfenv = setfenv,
+    setfenv = setfenv
 }
 
 local token = require('token')
 
 -- global env will be broke by lunit
 require('lunit')
-module( "test_token", lunit.testcase)
+module('test_token', lunit.testcase)
 
 function test_create()
     assert_table(token)

@@ -9,14 +9,14 @@ local genv = {
     getfenv = getfenv,
     pcall = pcall,
     print = print,
-    setfenv = setfenv,
+    setfenv = setfenv
 }
 
 local buffer = require('buffer')
 
 -- global env will be broke by lunit
 require('lunit')
-module( "test_buffer", lunit.testcase)
+module('test_buffer', lunit.testcase)
 
 function test_require()
     assert_function(buffer)
@@ -26,24 +26,24 @@ end
 
 function test_load()
     local b1 = buffer()
-    b1.load("Makefile")
+    b1.load('Makefile')
     assert_table(b1)
     local b2 = buffer()
-    b2.load("test_buffer.lua")
+    b2.load('test_buffer.lua')
     assert_table(b2)
     assert_not_equal(b1.len(), b2.len())
 end
 
 function test_sub()
     local b = buffer()
-    b.load("Makefile")
+    b.load('Makefile')
     assert_equal('usage', b.sub(0, 4))
 end
 
 function test_at()
     -- statements
     local b = buffer()
-    b.load("Makefile")
+    b.load('Makefile')
     assert_equal('u', b.at(0))
     assert_equal('s', b.at(1))
     assert_equal('a', b.at(2))

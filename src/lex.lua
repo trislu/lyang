@@ -42,7 +42,19 @@ local BLOCK = {
     ['{'] = 1
 }
 
+CUSTOM_LEX = nil
+
 return function(buffer)
+    -- allow user-defined lexer
+    if CUSTOM_LEX then
+        --[[
+        The default lexer depends on nothing but builtin lua.
+        But if which performance is considered unacceptable,
+        one can be substituted by a high performace version.
+        E.g. LPEG or luajit FFI
+        ]]
+        return CUSTOM_LEX
+    end
     -- create internal scanner
     local s = scanner(buffer)
     -- create internal driver

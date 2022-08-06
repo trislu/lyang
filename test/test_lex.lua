@@ -19,7 +19,7 @@ local token = require('token')
 
 -- global env will be broke by lunit
 require('lunit')
-module('test_buffer', lunit.testcase)
+module('test_lex', lunit.testcase)
 
 function test_unquoted_string()
     local b = buffer()

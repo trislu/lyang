@@ -1,8 +1,3 @@
--- make sure test cases can source 'lunit'
-package.path = package.path .. ';../3rd/lunit/?.lua'
--- make sure test cases can source 'src'
-package.path = package.path .. ';../src/?.lua'
-
 -- cache global env firstly
 local genv = {
     -- add needed global functions here

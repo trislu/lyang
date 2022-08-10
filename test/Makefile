@@ -2,8 +2,8 @@ usage: basic-usage
 
 test_cases := $(patsubst %.lua, %, $(wildcard *.lua))
 $(test_cases):
-	@echo "------ Run Testcase ($@.lua) ------" 
-	@lua $@.lua
+	@echo "------ Run Testcase ($@.lua) ------"
+	@export LUA_PATH="../src/?.lua;../3rd/lunit/?.lua;;" && lua $@.lua
 	@echo "------ End ------"
 	@echo ""
 

@@ -513,38 +513,49 @@ return {
     validate_substmt_of = function(stmt)
         local s = stmt
         local vmap = substmt_syntax[s]()
+        local lasterr = nil
         return {
             meet = function(substmt)
                 if nil == vmap[substmt] then
-                    error('"' .. substmt .. '" is not a valid substatement of "' .. s .. '"', 2)
+                    lasterr = '"' .. substmt .. '" is not a valid substatement of "' .. s .. '"'
+                    return false
                 else
                     if '?' == vmap[substmt][1] then
                         if vmap[substmt][2] then
-                            error('"' .. s .. '" can only contain one "' .. substmt .. '" substatement', 2)
+                            lasterr = '"' .. s .. '" can only contain one "' .. substmt .. '" substatement'
+                            return false
                         else
                             vmap[substmt][2] = 1
                         end
                     elseif 1 == vmap[substmt][1] then
                         if vmap[substmt][2] then
-                            error('"' .. s .. '" can only contain one "' .. substmt .. '" substatement', 2)
+                            lasterr = '"' .. s .. '" can only contain one "' .. substmt .. '" substatement'
+                            return false
                         else
                             vmap[substmt][2] = 1
                         end
                     end
                 end
+                return true
             end,
             fin = function()
                 for ss, rec in pairs(vmap) do
                     if 1 == rec[1] then
                         if nil == rec[2] then
-                            error('"' .. s .. '" requires one "' .. ss .. '" substatement but there is none', 2)
+                            lasterr = '"' .. s .. '" requires one "' .. ss .. '" substatement but there is none'
+                            return false
                         end
                     elseif '+' == rec[1] then
                         if nil == rec[2] then
-                            error('"' .. s .. '" requires one or more "' .. ss .. '" substatement but there is none', 2)
+                            lasterr = '"' .. s .. '" requires one or more "' .. ss .. '" substatement but there is none'
+                            return false
                         end
                     end
                 end
+                return true
+            end,
+            lasterr = function()
+                return lasterr
             end
         }
     end

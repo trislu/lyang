@@ -26,5 +26,8 @@
                 "ms-vscode.cpptools-extension-pack"
             ]
         }
-    }
+    },
+    "mounts": [
+        "source=vscode-extension-cache,target=/home/vscode/.vscode-server/extensions,type=volume"
+    ]
 }

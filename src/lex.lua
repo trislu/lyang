@@ -39,7 +39,7 @@ local SEP = {
 local BLOCK = {
     [';'] = 1,
     ['{'] = 1,
-    ['{'] = 1
+    ['}'] = 1
 }
 
 CUSTOM_LEX = nil
@@ -57,30 +57,30 @@ return function(buffer)
     end
     -- create internal scanner
     local s = scanner(buffer)
-    -- create internal driver
-    local driver =
+    -- create internal tokenizer
+    local tokenizer =
         coroutine.create(
         function()
-            -- state machine
+            --[[ Lexical Tokenization (https://www.rfc-editor.org/rfc/rfc7950.html#section-6.1) ]]
             local state = {}
             -- [void]
             state.void = function()
                 local ch = s.peek()
-                if CRLF[ch] then
+                if nil == ch then
+                    -- EOS
+                    return nil
+                elseif CRLF[ch] then
                     s.next()
                     return state.void
                 elseif SEP[ch] then
                     -- statements
                     s.next()
                     return state.void
-                elseif nil == ch then
-                    -- EOF
-                    return nil
                 elseif BLOCK[ch] or '+' == ch then
                     s.next()
                     s.consume()
                     -- make single char token
-                    return state.void, s.make_token(token.CHAR)
+                    return state.void, s.make_character_token(ch)
                 elseif "'" == ch or '"' == ch then
                     -- encounter quoted string
                     return state.qstring
@@ -105,9 +105,9 @@ return function(buffer)
                     local ch = s.peek()
                     if nil == ch then
                         -- reach EOF
-                        return nil, s.make_token(token.UQSTR)
+                        return nil, s.make_string_token(token.UnquotedString)
                     elseif SEP[ch] or CRLF[ch] or BLOCK[ch] or "'" == ch or '"' == ch then
-                        return state.void, s.make_token(token.UQSTR)
+                        return state.void, s.make_string_token(token.UnquotedString)
                     else
                         s.next()
                     end
@@ -170,9 +170,9 @@ return function(buffer)
                     s.next()
                 end
                 if '"' == quote then
-                    tk = s.make_token(token.DQSTR)
+                    tk = s.make_string_token(token.DoubleQuotedString)
                 else
-                    tk = s.make_token(token.SQSTR)
+                    tk = s.make_string_token(token.SingleQuotedString)
                 end
                 -- skip tail quote
                 s.next()
@@ -208,7 +208,7 @@ return function(buffer)
                 -- tailing garbage
                 return nil
             end
-            -- driver loop
+            -- tokenizer loop
             local next_state = state.void
             local token = nil
             while true do
@@ -225,7 +225,7 @@ return function(buffer)
     -- create lexer
     local l = {
         next_token = function()
-            local _, tk = coroutine.resume(driver)
+            local _, tk = coroutine.resume(tokenizer)
             return tk
         end
     }

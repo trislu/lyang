@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
-
 require('lunit')
 module('test_scanner', lunit.testcase, package.seeall)
 
@@ -71,14 +70,12 @@ function test_make_token()
     local s = scanner(b)
     local ch = s.next() -- h
     s.consume() -- point to 'h'
-    local tk1 = s.make_token(token.CHAR)
-    assert_equal('h', b.sub(tk1.start, tk1.start + tk1.length))
     s.next() -- e
     s.next() -- l
     s.next() -- l
     s.next() -- o
-    local tk2 = s.make_token(token.UQSTR)
-    assert_equal('hello', b.sub(tk2.start, tk2.start + tk2.length))
+    local tk2 = s.make_string_token(token.UnquotedString)
+    assert_equal('hello', tk2.content)
     s.next() -- skip ws
     s.next() -- w
     s.consume() -- point to 'w'
@@ -86,8 +83,8 @@ function test_make_token()
     s.next() -- r
     s.next() -- l
     s.next() -- d
-    local tk3 = s.make_token(token.UQSTR)
-    assert_equal('world', b.sub(tk3.start, tk3.start + tk3.length))
+    local tk3 = s.make_string_token(token.UnquotedString)
+    assert_equal('world', tk3.content)
 end
 
 lunit.main(...)

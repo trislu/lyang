@@ -22,18 +22,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 return {
-    CHAR = 1,
-    UQSTR = 2,
-    SQSTR = 3,
-    DQSTR = 4,
-    create = function(typ, strt, len, row, col)
-        local tk = {
+    UnquotedString = 1,
+    SingleQuotedString = 2,
+    DoubleQuotedString = 3,
+    Plus = 4,
+    Semicolon = 5,
+    LeftBrace = 6,
+    RightBrace = 7,
+    new = function(typ, content, row, col)
+        local t = {
             type = typ,
-            start = strt,
-            length = len,
+            content = content,
             row = row,
             col = col
         }
-        return tk
+        return t
     end
 }

@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
-
 -- global env will be broke by lunit
 require('lunit')
 module('test_token', lunit.testcase, package.seeall)
@@ -30,29 +29,26 @@ local token = require('token')
 
 function test_create()
     assert_table(token)
-    local tk = token.create(token.CHAR, 0, 1, 2, 3)
+    local tk = token.new(token.LeftBrace, '{', 2, 3)
     assert_table(tk)
-    assert_equal(tk.type, token.CHAR)
-    assert_equal(tk.start, 0)
-    assert_equal(tk.length, 1)
+    assert_equal(tk.type, token.LeftBrace)
+    assert_equal('{', tk.content)
     assert_equal(tk.row, 2)
     assert_equal(tk.col, 3)
 end
 
 function test_create2()
-    local tk1 = token.create(token.CHAR, 0, 1, 2, 3)
-    local tk2 = token.create(token.UQSTR, 4, 5, 6, 7)
+    local tk1 = token.new(token.RightBrace, '}', 2, 3)
+    local tk2 = token.new(token.UnquotedString, 'unquoted-string', 6, 7)
     assert_not_equal(tk1, tk2)
     assert_table(tk1)
-    assert_equal(tk1.type, token.CHAR)
-    assert_equal(tk1.start, 0)
-    assert_equal(tk1.length, 1)
+    assert_equal(tk1.type, token.RightBrace)
+    assert_equal('}', tk1.content)
     assert_equal(tk1.row, 2)
     assert_equal(tk1.col, 3)
     assert_table(tk2)
-    assert_equal(tk2.type, token.UQSTR)
-    assert_equal(tk2.start, 4)
-    assert_equal(tk2.length, 5)
+    assert_equal(tk2.type, token.UnquotedString)
+    assert_equal('unquoted-string', tk2.content)
     assert_equal(tk2.row, 6)
     assert_equal(tk2.col, 7)
 end

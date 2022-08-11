@@ -23,6 +23,13 @@ SOFTWARE.
 ]]
 local token = require('token')
 
+local _single_char_token = {
+    [';'] = token.Semicolon,
+    ['+'] = token.Plus,
+    ['{'] = token.LeftBrace,
+    ['}'] = token.RightBrace
+}
+
 return function(buf)
     local cur = nil
     local con = nil
@@ -71,9 +78,11 @@ return function(buf)
         consume = function()
             con = cur
         end,
-        make_token = function(t)
-            -- make
-            return token.create(t, con, cur - con, line, column)
+        make_string_token = function(t)
+            return token.new(t, buffer.sub(con, cur), line, column)
+        end,
+        make_character_token = function(c)
+            return token.new(_single_char_token[c], c, line, column)
         end
     }
     return s

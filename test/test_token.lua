@@ -33,7 +33,7 @@ function test_create()
     assert_table(tk)
     assert_equal(tk.type, token.LeftBrace)
     assert_equal('{', tk.content)
-    assert_equal(tk.row, 2)
+    assert_equal(tk.line, 2)
     assert_equal(tk.col, 3)
 end
 
@@ -44,12 +44,12 @@ function test_create2()
     assert_table(tk1)
     assert_equal(tk1.type, token.RightBrace)
     assert_equal('}', tk1.content)
-    assert_equal(tk1.row, 2)
+    assert_equal(tk1.line, 2)
     assert_equal(tk1.col, 3)
     assert_table(tk2)
     assert_equal(tk2.type, token.UnquotedString)
     assert_equal('unquoted-string', tk2.content)
-    assert_equal(tk2.row, 6)
+    assert_equal(tk2.line, 6)
     assert_equal(tk2.col, 7)
 end
 

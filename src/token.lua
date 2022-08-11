@@ -21,6 +21,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
+local ts = {
+    'unquoted string', -- 1
+    'single quoted string', -- 2
+    'double quoted string', -- 3
+    '+', -- 4
+    ';', -- 5
+    '{', -- 6
+    '}' -- 7
+}
+
 return {
     UnquotedString = 1,
     SingleQuotedString = 2,
@@ -29,13 +39,16 @@ return {
     Semicolon = 5,
     LeftBrace = 6,
     RightBrace = 7,
-    new = function(typ, content, row, col)
+    new = function(typ, content, line, col)
         local t = {
             type = typ,
             content = content,
-            row = row,
+            line = line,
             col = col
         }
         return t
+    end,
+    typename = function(t)
+        return ts[t]
     end
 }

@@ -76,5 +76,13 @@ return {
                 return f[i]
             end
         end
-    end
+    end,
+    path = {
+        basename = function(url)
+            return url:match('[^' .. _sep .. ']-$')
+        end,
+        splitext = function(url)
+            return {url:match('[^' .. _sep .. ']-$'), url:match('%.[^.' .. _sep .. ']+$')}
+        end
+    }
 }

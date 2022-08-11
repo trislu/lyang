@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
-
 require('lunit')
 module('test_system', lunit.testcase, package.seeall)
 
@@ -54,6 +53,41 @@ function test_dir()
         local trimed = abspath:sub(#testdir + 1, #abspath)
         assert_not_nil(filelist[trimed])
     end
+end
+
+function test_path_basename()
+    assert_equal('abc.lua', system.path.basename('/a/b/c/abc.lua'))
+    assert_equal('abc.lua', system.path.basename('http://foo.com/abc.lua'))
+    assert_equal('abc.lua', system.path.basename('abc.lua'))
+    assert_equal('abc', system.path.basename('abc'))
+end
+
+function test_path_splitext()
+    local r = nil
+    -- local path
+    r = system.path.splitext('/a/b/c/abc.lua')
+    assert_table(r)
+    assert_equal(2, #r)
+    assert_equal('abc.lua', r[1])
+    assert_equal('.lua', r[2])
+    -- network path
+    r = system.path.splitext('http://foo.com/abc.lua')
+    assert_table(r)
+    assert_equal(2, #r)
+    assert_equal('abc.lua', r[1])
+    assert_equal('.lua', r[2])
+    -- without seperator
+    r = system.path.splitext('abc.lua')
+    assert_table(r)
+    assert_equal(2, #r)
+    assert_equal('abc.lua', r[1])
+    assert_equal('.lua', r[2])
+    -- without ext
+    r = system.path.splitext('/foo/abc')
+    assert_table(r)
+    assert_equal(1, #r)
+    assert_equal('abc', r[1])
+    assert_nil(r[2])
 end
 
 lunit.main(...)

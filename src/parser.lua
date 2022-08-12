@@ -26,6 +26,7 @@ local token = require('token')
 local buffer = require('buffer')
 local lex = require('lex')
 local syntax = require('syntax')
+local statement = require('statement')
 
 return function()
     local filename = nil
@@ -33,14 +34,66 @@ return function()
     local argument_string = {}
     local stmt_stack = stack()
     local rule_stack = stack()
-    local extension_flag = false
+    local extension_root = nil
     local lasterr = nil
     local format_error = function(msg)
         return filename .. ':' .. current_token.line .. ':' .. current_token.col .. ': ' .. msg
     end
-    local run = function()
+    local run = function(l)
+        -- input lexer
+        local lexer = l
         -- parser state
         local state = {}
+        -- [[end statement]]
+        state.statement_end = function()
+            if extension_root then
+                if extension_root == stmt_stack.size() then
+                    -- leave the extension context totally
+                    extension_root = nil
+                end
+                --[[TOOD:verify extension syntax?]]
+            else
+                -- end of what
+                local rule = rule_stack.top()
+                if not rule.fin() then
+                    lasterr = format_error(rule.lasterr())
+                    return nil
+                end
+                -- pop rule stacks
+                rule_stack.pop()
+            end
+            stmt_stack.pop()
+        end
+        state.substatement_begin = function()
+        end
+        -- [[extension]]
+        state.extension = function()
+            -- create statement
+            local stmt = statement()
+            stmt.keyword = current_token.content
+            stmt.position.line = current_token.line
+            stmt.position.col = current_token.col
+            stmt.parent = stmt_stack.top()
+            stmt_stack.push(stmt)
+            -- mark as extension
+            current_token = lexer.next_token()
+            if token.UnquotedString == current_token.type then
+                -- unquoted argument string
+                return state.unquoted_argument
+            elseif token.SingleQuotedString == current_token.type or token.DoubleQuotedString == current_token.type then
+                -- quoted argument string
+                return state.quoted_argument
+            elseif token.LeftBrace then
+                -- begin substatement
+                return state.substatement_begin
+            elseif token.Semicolon then
+                -- end statement
+                return state.statement_end
+            else
+                lasterr = format_error('expected token "' .. token.typename(current_token.type) .. '"')
+                return nil
+            end
+        end
         -- [keyword]
         state.keyword = function()
             if token.UnquotedString ~= current_token.type then
@@ -55,10 +108,17 @@ return function()
                     prefix identifier, followed by a colon (":"), followed by a language
                     extension keyword.
                 ]]
-                extension_flag = true
-            end
-            local rule = syntax(current_token.content)
-            if nil == rule then
+                if nil == extension_root then
+                    -- enter extension statement firstly
+                    extension_root = stmt_stack.size() + 1
+                end
+                return state.extension
+            else
+                local rule = syntax(current_token.content)
+                if nil == rule then
+                    lasterr = format_error('unknown keyword "' .. current_token.content .. '"')
+                    return nil
+                end
             end
         end
     end

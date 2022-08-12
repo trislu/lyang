@@ -616,25 +616,25 @@ return function(stmt)
             end
             return true
         end,
-        fin = function()
+        violated = function()
             if lasterr then
                 -- there exists errors already
-                return false
+                return true
             end
             for ss, rec in pairs(vmap) do
                 if 1 == rec[1] then
                     if nil == rec[2] then
                         lasterr = '"' .. s .. '" requires one "' .. ss .. '" substatement but there is none'
-                        return false
+                        return true
                     end
                 elseif '+' == rec[1] then
                     if nil == rec[2] then
                         lasterr = '"' .. s .. '" requires one or more "' .. ss .. '" substatement but there is none'
-                        return false
+                        return true
                     end
                 end
             end
-            return true
+            return false
         end,
         lasterr = function()
             return lasterr

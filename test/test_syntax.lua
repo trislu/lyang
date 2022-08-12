@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
-
 require('lunit')
 module('test_syntax', lunit.testcase, package.seeall)
 
@@ -110,21 +109,21 @@ function test_module_valid_substmt()
     assert_true(s_module.meet('namespace'))
     assert_true(s_module.meet('prefix'))
     assert_true(s_module.meet('container'))
-    assert_true(s_module.fin())
+    assert(not s_module.violated())
 end
 
 function test_module_invalid_substmt()
     local s_module = syntax('module')
     assert_false(s_module.meet('foo'))
-    assert_equal(s_module.lasterr(),'"foo" is not a valid substatement of "module"')
+    assert_equal(s_module.lasterr(), '"foo" is not a valid substatement of "module"')
 end
 
 function test_module_mandatory_substmt()
     local s_module = syntax('module')
     assert_true(s_module.meet('yang-version'))
     assert_true(s_module.meet('namespace'))
-    assert_false(s_module.fin())
-    assert_equal(s_module.lasterr(),'"module" requires one "prefix" substatement but there is none')
+    assert(s_module.violated())
+    assert_equal(s_module.lasterr(), '"module" requires one "prefix" substatement but there is none')
 end
 
 function test_module_unique_substmt()

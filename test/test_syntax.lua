@@ -109,7 +109,7 @@ function test_module_valid_substmt()
     assert_true(s_module.meet('namespace'))
     assert_true(s_module.meet('prefix'))
     assert_true(s_module.meet('container'))
-    assert(not s_module.violated())
+    assert(s_module.valid())
 end
 
 function test_module_invalid_substmt()
@@ -122,7 +122,7 @@ function test_module_mandatory_substmt()
     local s_module = syntax('module')
     assert_true(s_module.meet('yang-version'))
     assert_true(s_module.meet('namespace'))
-    assert(s_module.violated())
+    assert(not s_module.valid())
     assert_equal(s_module.lasterr(), '"module" requires one "prefix" substatement but there is none')
 end
 

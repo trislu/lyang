@@ -21,9 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
+local syntax = require('syntax')
+
 CUSTOM_STMT = nil
 
-return function()
+return function(keyword)
     if CUSTOM_STMT then
         --[[
         NOTICE:
@@ -36,7 +38,7 @@ return function()
     end
     local substmts = {}
     local stmt = {
-        keyworkd = nil,
+        keyworkd = keyword,
         argument = nil,
         parent = nil,
         position = {
@@ -52,7 +54,8 @@ return function()
         end,
         substmt_count = function()
             return #substmts
-        end
+        end,
+        syntax = syntax(keyword)
     }
     return stmt
 end

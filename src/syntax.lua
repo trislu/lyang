@@ -584,7 +584,7 @@ return function(stmt)
         return nil
     end
     local s = stmt
-    local vmap = {}
+    local vmap = nil
     if substmt_syntax[s] then
         vmap = substmt_syntax[s]()
     end
@@ -594,7 +594,10 @@ return function(stmt)
             return yinstmt_syntax[s][1]
         end,
         meet = function(substmt)
-            if nil == vmap[substmt] then
+            if nil == vmap then
+                lasterr = 'not allowed to define substatements for "' .. s .. '"'
+                return false
+            elseif nil == vmap[substmt] then
                 lasterr = '"' .. substmt .. '" is not a valid substatement of "' .. s .. '"'
                 return false
             else

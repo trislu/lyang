@@ -43,10 +43,10 @@ function test_unquoted_string()
         end
     end
     local tk1 = tokens[1]
-    assert_equal(token.UnquotedString, tk1.type)
+    assert_equal(TK_UQSTR, tk1.type)
     assert_equal('hello', tk1.content)
     local tk2 = tokens[2]
-    assert_equal(token.UnquotedString, tk2.type)
+    assert_equal(TK_UQSTR, tk2.type)
     assert_equal('world', tk2.content)
 end
 
@@ -65,10 +65,10 @@ function test_single_quoted_string()
         end
     end
     local tk1 = tokens[1]
-    assert_equal(token.UnquotedString, tk1.type)
+    assert_equal(TK_UQSTR, tk1.type)
     assert_equal('hello', tk1.content)
     local tk2 = tokens[2]
-    assert_equal(token.SingleQuotedString, tk2.type)
+    assert_equal(TK_SQSTR, tk2.type)
     assert_equal('world', tk2.content)
 end
 
@@ -87,10 +87,10 @@ function test_double_quoted_string()
         end
     end
     local tk1 = tokens[1]
-    assert_equal(token.UnquotedString, tk1.type)
+    assert_equal(TK_UQSTR, tk1.type)
     assert_equal('hello', tk1.content)
     local tk2 = tokens[2]
-    assert_equal(token.DoubleQuotedString, tk2.type)
+    assert_equal(TK_DQSTR, tk2.type)
     assert_equal('world', tk2.content)
 end
 
@@ -109,13 +109,13 @@ function test_single_character()
         end
     end
     local tk1 = tokens[3]
-    assert_equal(token.Semicolon, tk1.type)
+    assert_equal(TK_SCOLON, tk1.type)
     assert_equal(';', tk1.content)
     local tk2 = tokens[4]
-    assert_equal(token.LeftBrace, tk2.type)
+    assert_equal(TK_LBRACE, tk2.type)
     assert_equal('{', tk2.content)
     local tk3 = tokens[5]
-    assert_equal(token.RightBrace, tk3.type)
+    assert_equal(TK_RBRACE, tk3.type)
     assert_equal('}', tk3.content)
 end
 
@@ -139,13 +139,13 @@ function test_line_comment()
     end
     assert_equal(3, #tokens)
     local tk1 = tokens[1]
-    assert_equal(token.UnquotedString, tk1.type)
+    assert_equal(TK_UQSTR, tk1.type)
     assert_equal('hello', tk1.content)
     local tk2 = tokens[2]
-    assert_equal(token.DoubleQuotedString, tk2.type)
+    assert_equal(TK_DQSTR, tk2.type)
     assert_equal('world', tk2.content)
     local tk3 = tokens[3]
-    assert_equal(token.Semicolon, tk3.type)
+    assert_equal(TK_SCOLON, tk3.type)
     assert_equal(';', tk3.content)
 end
 
@@ -172,13 +172,13 @@ function test_block_comment()
     end
     assert_equal(3, #tokens)
     local tk1 = tokens[1]
-    assert_equal(token.UnquotedString, tk1.type)
+    assert_equal(TK_UQSTR, tk1.type)
     assert_equal('hello', tk1.content)
     local tk2 = tokens[2]
-    assert_equal(token.DoubleQuotedString, tk2.type)
+    assert_equal(TK_DQSTR, tk2.type)
     assert_equal('world', tk2.content)
     local tk3 = tokens[3]
-    assert_equal(token.Semicolon, tk3.type)
+    assert_equal(TK_SCOLON, tk3.type)
     assert_equal(';', tk3.content)
 end
 

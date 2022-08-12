@@ -31,14 +31,15 @@ local ts = {
     '}' -- 7
 }
 
+TK_UQSTR = 1
+TK_SQSTR = 2
+TK_DQSTR = 3
+TK_PLUS = 4
+TK_SCOLON = 5
+TK_LBRACE = 6
+TK_RBRACE = 7
+
 return {
-    UnquotedString = 1,
-    SingleQuotedString = 2,
-    DoubleQuotedString = 3,
-    Plus = 4,
-    Semicolon = 5,
-    LeftBrace = 6,
-    RightBrace = 7,
     new = function(typ, content, line, col)
         local t = {
             type = typ,

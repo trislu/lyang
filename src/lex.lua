@@ -105,9 +105,9 @@ return function(buffer)
                     local ch = s.peek()
                     if nil == ch then
                         -- reach EOF
-                        return nil, s.make_string_token(token.UnquotedString)
+                        return nil, s.make_string_token(TK_UQSTR)
                     elseif SEP[ch] or CRLF[ch] or BLOCK[ch] or "'" == ch or '"' == ch then
-                        return state.void, s.make_string_token(token.UnquotedString)
+                        return state.void, s.make_string_token(TK_UQSTR)
                     else
                         s.next()
                     end
@@ -170,9 +170,9 @@ return function(buffer)
                     s.next()
                 end
                 if '"' == quote then
-                    tk = s.make_string_token(token.DoubleQuotedString)
+                    tk = s.make_string_token(TK_DQSTR)
                 else
-                    tk = s.make_string_token(token.SingleQuotedString)
+                    tk = s.make_string_token(TK_SQSTR)
                 end
                 -- skip tail quote
                 s.next()

@@ -49,11 +49,11 @@ function test_stack_pop()
     local s = stack()
     for i = 1, 10 do
         -- statements
-        s.push(111)
+        s.push(i)
     end
     for i = 1, 10 do
         -- statements
-        s.pop()
+        assert_equal(10 - i + 1, s.pop())
         assert_equal(10 - i, s.size())
     end
 end

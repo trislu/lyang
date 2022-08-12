@@ -28,7 +28,9 @@ return function()
             s[#s + 1] = v
         end,
         pop = function()
+            local t = s[#s]
             s[#s] = nil
+            return t
         end,
         top = function()
             return s[#s]

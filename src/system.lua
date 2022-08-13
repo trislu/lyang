@@ -82,7 +82,7 @@ return {
             return url:match('[^' .. _sep .. ']-$')
         end,
         splitext = function(url)
-            return {url:match('[^' .. _sep .. ']-$'), url:match('%.[^.' .. _sep .. ']+$')}
+            return {url:match('[^' .. _sep .. ']-$'):match('[^.]+'), url:match('%.[^.' .. _sep .. ']+$')}
         end
     }
 }

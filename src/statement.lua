@@ -38,7 +38,7 @@ return function(keyword)
     end
     local substmts = {}
     local stmt = {
-        keyworkd = keyword,
+        keyword = keyword,
         argument = nil,
         parent = nil,
         position = {

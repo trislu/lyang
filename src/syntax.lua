@@ -624,16 +624,18 @@ return function(stmt)
                 -- there exists errors already
                 return false
             end
-            for ss, rec in pairs(vmap) do
-                if 1 == rec[1] then
-                    if nil == rec[2] then
-                        lasterr = '"' .. s .. '" requires one "' .. ss .. '" substatement but there is none'
-                        return false
-                    end
-                elseif '+' == rec[1] then
-                    if nil == rec[2] then
-                        lasterr = '"' .. s .. '" requires one or more "' .. ss .. '" substatement but there is none'
-                        return false
+            if vmap then
+                for ss, rec in pairs(vmap) do
+                    if 1 == rec[1] then
+                        if nil == rec[2] then
+                            lasterr = '"' .. s .. '" requires one "' .. ss .. '" substatement but there is none'
+                            return false
+                        end
+                    elseif '+' == rec[1] then
+                        if nil == rec[2] then
+                            lasterr = '"' .. s .. '" requires one or more "' .. ss .. '" substatement but there is none'
+                            return false
+                        end
                     end
                 end
             end

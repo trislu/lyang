@@ -21,19 +21,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
-
 require('lunit')
 module('test_argparse', lunit.testcase, package.seeall)
 
 local argparse = require('argparse')
 
 function test_create_parser()
-    local p = argparse.create()
+    local p = argparse()
     assert_not_nil(p, 'create paser return nil!')
 end
 
 function test_print_usage()
-    local p = argparse.create()
+    local p = argparse()
     local _sandbox = getfenv(p.print_usage)
     _sandbox.print = function(params)
         -- sandbox print
@@ -47,7 +46,7 @@ function test_print_usage()
 end
 
 function test_add_arguments()
-    local p = argparse.create()
+    local p = argparse()
     -- nil
     assert_false(pcall(p.add_argument, nil))
     -- string
@@ -89,7 +88,7 @@ function test_add_arguments()
 end
 
 function test_parse_args()
-    local p = argparse.create()
+    local p = argparse()
     -- prepare test option
     local test_option = {
         '-t',

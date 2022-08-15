@@ -150,7 +150,6 @@ return function(buffer)
                 The backslash MUST NOT be followed by any other character.
             ]]
                 local next_state = state.void
-                local tk = nil
                 while true do
                     local ch = s.peek()
                     if nil == ch then
@@ -169,14 +168,10 @@ return function(buffer)
                     end
                     s.next()
                 end
-                if '"' == quote then
-                    tk = s.make_string_token(TK_DQSTR)
-                else
-                    tk = s.make_string_token(TK_SQSTR)
-                end
+                local tk = ('"' == quote) and s.make_string_token(TK_DQSTR) or s.make_string_token(TK_SQSTR)
                 -- skip tail quote
                 s.next()
-                return state.void, tk
+                return next_state, tk
             end
             -- [line comment]
             state.lcomment = function()
@@ -210,14 +205,11 @@ return function(buffer)
             end
             -- tokenizer loop
             local next_state = state.void
-            local token = nil
-            while true do
-                next_state, token = next_state()
-                if token then
-                    coroutine.yield(token)
-                end
-                if nil == next_state then
-                    break
+            local tk = nil
+            while next_state do
+                next_state, tk = next_state()
+                if tk then
+                    coroutine.yield(tk)
                 end
             end
         end

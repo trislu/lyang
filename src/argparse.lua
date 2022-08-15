@@ -131,7 +131,7 @@ return function()
                                 if #nargs < 1 then
                                     error('option "' .. _arg .. '" expect 1 or more argument while 0 given')
                                 end
-                            elseif '*' == option.nargs then
+                            elseif '*' == option.nargs then -- luacheck: ignore
                                 -- good
                             else
                                 error('option "' .. _arg .. '" invalid nargs ' .. option.nargs)

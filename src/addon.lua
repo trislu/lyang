@@ -39,23 +39,26 @@ end
 local addon_t = {}
 
 return {
-    new = function()
+    --- create the abstract 'addon' base object
+    create = function()
         local base = {}
         -- base functions to be overwritten
+        -- luacheck: ignore self
         function base:init()
-            print('base:init')
         end
-        function base:add_option(argparse)
+        function base:add_formatter(_ctx)
+            -- luacheck: ignore ctx
+            print('base:add_formatter')
+        end
+        function base:add_option(_argparse)
+            -- luacheck: ignore argparse
             print('base:add_option')
         end
         function base:setup_context(ctx)
             print('base:setup_context')
         end
-        function base:add_formatter(ctx)
-            print('base:add_formatter')
-        end
-        function base:generate(ctx)
-            print('base:generate')
+        function base:convert(ctx)
+            print('base:do_convert')
         end
         return base
     end,
@@ -71,7 +74,7 @@ return {
     end,
     load = function(name, addon)
         addon_t[name] = addon
-        addon_t[#addon_t+1] = addon
+        addon_t[#addon_t + 1] = addon
     end,
     list = function()
         local i = 0

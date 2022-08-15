@@ -15,6 +15,6 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositorie
 
 # ** [Optional] Uncomment this section to install additional packages. **
 RUN apk update \
-    && apk add --no-cache build-base gdb valgrind cmake lua5.1 luajit-dev luarocks
+    && apk add --no-cache build-base gdb valgrind cmake lua5.1 luajit-dev luarocks luacheck
 
 #RUN luarocks-5.1 install luaunit --local

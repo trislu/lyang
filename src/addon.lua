@@ -23,25 +23,63 @@ SOFTWARE.
 ]]
 local system = require('system')
 
-local addon_list = {}
+local addon_t = {}
+
+--
+local files = {}
+local lyang_path = os.getenv('LYANG_PATH')
+if nil == lyang_path then
+    error('environment variable "LYANG_PATH" was not set')
+end
+for file in system.dir(lyang_path .. system.sep() .. 'addons') do
+    local ret = system.path.splitext(file)
+    if '.lua' == ret[2] then
+        print('scan ', ret[1])
+        files[#files + 1] = ret[1]
+    end
+end
 
 return {
-    init = function()
-        local lyang_path = os.getenv('LYANG_PATH')
-        if nil == lyang_path then
-            error('environment variable "LYANG_PATH" was not set')
+    new = function()
+        local a = {}
+        -- base functions to be overwritten
+        function a:init()
+            print('a:init')
         end
-        local addon_scan = system.dir(lyang_path .. system.sep() .. 'addons')
-        while true do
-            -- statements
-            local addon = addon_scan()
-            if nil == addon then
-                break
+        function a:add_option(argparse)
+            print('a:add_option')
+        end
+        function a:setup_context(ctx)
+            print('a:setup_context')
+        end
+        function a:add_formatter(ctx)
+            print('a:add_formatter')
+        end
+        function a:generate(ctx)
+            print('a:generate')
+        end
+        return a
+    end,
+    scan = function()
+        local i = 0
+        local s = #files
+        return function()
+            i = i + 1
+            if i <= s then
+                return files[i]
             end
-            local ret = system.path.splitext(addon)
-            if '.lua' == ret[2] then
-                require(ret[1])
-                addon_list[#addon_list + 1] = ret[1]
+        end
+    end,
+    add = function(a)
+        addon_t[#addon_t+1] = a
+    end,
+    list = function()
+        local i = 0
+        local s = #addon_t
+        return function()
+            i = i + 1
+            if i <= s then
+                return addon_t[i]
             end
         end
     end

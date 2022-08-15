@@ -23,9 +23,7 @@ SOFTWARE.
 ]]
 local system = require('system')
 
-local addon_t = {}
-
---
+-- the lua require mechanism ensure the search is performed only once
 local files = {}
 local lyang_path = os.getenv('LYANG_PATH')
 if nil == lyang_path then
@@ -34,31 +32,32 @@ end
 for file in system.dir(lyang_path .. system.sep() .. 'addons') do
     local ret = system.path.splitext(file)
     if '.lua' == ret[2] then
-        print('scan ', ret[1])
         files[#files + 1] = ret[1]
     end
 end
+-- addon table
+local addon_t = {}
 
 return {
     new = function()
-        local a = {}
+        local base = {}
         -- base functions to be overwritten
-        function a:init()
-            print('a:init')
+        function base:init()
+            print('base:init')
         end
-        function a:add_option(argparse)
-            print('a:add_option')
+        function base:add_option(argparse)
+            print('base:add_option')
         end
-        function a:setup_context(ctx)
-            print('a:setup_context')
+        function base:setup_context(ctx)
+            print('base:setup_context')
         end
-        function a:add_formatter(ctx)
-            print('a:add_formatter')
+        function base:add_formatter(ctx)
+            print('base:add_formatter')
         end
-        function a:generate(ctx)
-            print('a:generate')
+        function base:generate(ctx)
+            print('base:generate')
         end
-        return a
+        return base
     end,
     scan = function()
         local i = 0
@@ -70,8 +69,9 @@ return {
             end
         end
     end,
-    add = function(a)
-        addon_t[#addon_t+1] = a
+    load = function(name, addon)
+        addon_t[name] = addon
+        addon_t[#addon_t+1] = addon
     end,
     list = function()
         local i = 0
@@ -82,5 +82,8 @@ return {
                 return addon_t[i]
             end
         end
+    end,
+    find = function(name)
+        return addon_t[name]
     end
 }

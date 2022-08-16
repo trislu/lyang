@@ -31,15 +31,14 @@ local ts = {
     '}' -- 7
 }
 
-TK_UQSTR = 1
-TK_SQSTR = 2
-TK_DQSTR = 3
-TK_PLUS = 4
-TK_SCOLON = 5
-TK_LBRACE = 6
-TK_RBRACE = 7
-
 return {
+    UQSTR = 1,
+    SQSTR = 2,
+    DQSTR = 3,
+    PLUS = 4,
+    SCOLON = 5,
+    LBRACE = 6,
+    RBRACE = 7,
     new = function(typ, content, line, col)
         local t = {
             type = typ,

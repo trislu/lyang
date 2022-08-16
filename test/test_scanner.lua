@@ -74,7 +74,7 @@ function test_make_token()
     s.next() -- l
     s.next() -- l
     s.next() -- o
-    local tk2 = s.make_string_token(TK_UQSTR)
+    local tk2 = s.make_string_token(token.UQSTR)
     assert_equal('hello', tk2.content)
     s.next() -- skip ws
     s.next() -- w
@@ -83,7 +83,7 @@ function test_make_token()
     s.next() -- r
     s.next() -- l
     s.next() -- d
-    local tk3 = s.make_string_token(TK_UQSTR)
+    local tk3 = s.make_string_token(token.UQSTR)
     assert_equal('world', tk3.content)
 end
 

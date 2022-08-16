@@ -46,18 +46,16 @@ return {
         -- luacheck: ignore self
         function base:init()
         end
-        function base:add_formatter(_ctx)
-            -- luacheck: ignore ctx
+        function base:add_formatter()
             print('base:add_formatter')
         end
-        function base:add_option(_argparse)
-            -- luacheck: ignore argparse
+        function base:add_option(argparse_)
             print('base:add_option')
         end
-        function base:setup_context(ctx)
+        function base:setup_context(ctx_)
             print('base:setup_context')
         end
-        function base:convert(ctx)
+        function base:convert(ctx_)
             print('base:do_convert')
         end
         return base

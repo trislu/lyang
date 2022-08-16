@@ -25,7 +25,6 @@ local stack = require('stack')
 local token = require('token')
 local buffer = require('buffer')
 local lex = require('lex')
-local syntax = require('syntax')
 local statement = require('statement')
 
 local function create_nfa(mode)
@@ -84,7 +83,7 @@ local function create_nfa(mode)
         if nil == self.cur_token then
             self.lasterr = self.filename .. ':0:0:token not found'
             return nil
-        elseif TK_UQSTR ~= self.cur_token.type then
+        elseif token.UQSTR ~= self.cur_token.type then -- luacheck:ignore
             --[[ (https://www.rfc-editor.org/rfc/rfc7950.html#section-6.1.3)
             "Note that any keyword can legally appear as an unquoted string."]]
             return self:abort_on_token(
@@ -139,18 +138,18 @@ local function create_nfa(mode)
             -- check if the statment needs argument string
             if stmt.syntax.arg then
                 -- argument string is required
-                if TK_UQSTR == self.cur_token.type then
+                if token.UQSTR == self.cur_token.type then
                     return self.meet_unquoted_argument
-                elseif TK_SQSTR == self.cur_token.type or TK_DQSTR == self.cur_token.type then
+                elseif token.SQSTR == self.cur_token.type or token.DQSTR == self.cur_token.type then
                     return self.meet_quoted_argument
                 else
                     return self:abort_on_token('unexpected token "' .. token.typename(self.cur_token.type) .. '"')
                 end
             else
                 -- argument string is not required: e.g. "input"/"output"
-                if TK_LBRACE == self.cur_token.type then
+                if token.LBRACE == self.cur_token.type then
                     return self.begin_substatement
-                elseif TK_SCOLON == self.cur_token.type then
+                elseif token.SCOLON == self.cur_token.type then
                     -- is it legal?
                     return self.end_statement
                 else
@@ -178,16 +177,16 @@ local function create_nfa(mode)
         self.stmt_stack.push(stmt)
         -- read next token
         self.cur_token = self.lexer.next_token()
-        if TK_UQSTR == self.cur_token.type then
+        if token.UQSTR == self.cur_token.type then
             -- unquoted argument string
             return self.meet_unquoted_argument
-        elseif TK_SQSTR == self.cur_token.type or TK_DQSTR == self.cur_token.type then
+        elseif token.SQSTR == self.cur_token.type or token.DQSTR == self.cur_token.type then
             -- quoted argument string
             return self.meet_quoted_argument
-        elseif TK_LBRACE == self.cur_token.type then
+        elseif token.LBRACE == self.cur_token.type then
             -- begin substatement
             return self.begin_substatement
-        elseif TK_SCOLON == self.cur_token.type then
+        elseif token.SCOLON == self.cur_token.type then
             -- end statement
             return self.end_statement
         else
@@ -203,10 +202,10 @@ local function create_nfa(mode)
         stmt.argument = self.cur_token.content
         -- read next token
         self.cur_token = self.lexer.next_token()
-        if TK_LBRACE == self.cur_token.type then
+        if token.LBRACE == self.cur_token.type then
             -- begin substatement
             return self.begin_substatement
-        elseif TK_SCOLON == self.cur_token.type then
+        elseif token.SCOLON == self.cur_token.type then
             -- end statement
             return self.end_statement
         else
@@ -223,17 +222,17 @@ local function create_nfa(mode)
         self.argument_string[#self.argument_string + 1] = self.cur_token.content
         -- read next token
         self.cur_token = self.lexer.next_token()
-        if TK_LBRACE == self.cur_token.type then
+        if token.LBRACE == self.cur_token.type then
             -- concat argument strings
             stmt.argument = table.concat(self.argument_string)
             -- begin substatement
             return self.begin_substatement
-        elseif TK_SCOLON == self.cur_token.type then
+        elseif token.SCOLON == self.cur_token.type then
             -- concat argument strings
             stmt.argument = table.concat(self.argument_string)
             -- end statement
             return self.end_statement
-        elseif TK_PLUS == self.cur_token.type then
+        elseif token.PLUS == self.cur_token.type then
             -- "+"
             return self.concat_quoted_argument
         else
@@ -246,7 +245,8 @@ local function create_nfa(mode)
         trace('nfa:concat_quoted_argument()')
         -- read next token
         self.cur_token = self.lexer.next_token()
-        if TK_SQSTR == self.cur_token.type or TK_DQSTR == self.cur_token.type then
+        -- luacheck: ignore
+        if token.SQSTR == self.cur_token.type or token.DQSTR == self.cur_token.type then
             -- concat next argument string
             return self.meet_quoted_argument
         else
@@ -262,18 +262,18 @@ local function create_nfa(mode)
         -- exntension subtree?
         if self.extension_root then
             -- read next token
-            if TK_UQSTR == self.cur_token.type then
+            if token.UQSTR == self.cur_token.type then
                 return self.meet_keyword
-            elseif TK_RBRACE == self.cur_token.type then
+            elseif token.RBRACE == self.cur_token.type then
                 return self.end_substatement
             else
                 return self:abort_on_token('unexpected token "' .. token.typename(self.cur_token.type) .. '"')
             end
         end
         -- standard
-        if TK_UQSTR == self.cur_token.type then
+        if token.UQSTR == self.cur_token.type then
             return self.meet_keyword
-        elseif TK_RBRACE == self.cur_token.type then
+        elseif token.RBRACE == self.cur_token.type then
             return self.end_substatement
         else
             return self:abort_on_token('unexpected token "' .. token.typename(self.cur_token.type) .. '"')
@@ -302,9 +302,9 @@ local function create_nfa(mode)
         self.cur_token = self.lexer.next_token()
         if nil == self.cur_token then
             return nil
-        elseif TK_UQSTR == self.cur_token.type then
+        elseif token.UQSTR == self.cur_token.type then
             return self.meet_keyword
-        elseif TK_RBRACE == self.cur_token.type then
+        elseif token.RBRACE == self.cur_token.type then
             return self.end_substatement
         else
             return self:abort_on_token('unexpected token "' .. token.typename(self.cur_token.type) .. '"')
@@ -332,9 +332,9 @@ local function create_nfa(mode)
         self.stmt_stack.pop()
         -- read next token
         self.cur_token = self.lexer.next_token()
-        if TK_UQSTR == self.cur_token.type then
+        if token.UQSTR == self.cur_token.type then
             return self.meet_keyword
-        elseif TK_RBRACE == self.cur_token.type then
+        elseif token.RBRACE == self.cur_token.type then
             return self.end_substatement
         else
             return self:abort_on_token('unexpected token "' .. token.typename(self.cur_token.type) .. '"')

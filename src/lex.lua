@@ -105,9 +105,9 @@ return function(buffer)
                     local ch = s.peek()
                     if nil == ch then
                         -- reach EOF
-                        return nil, s.make_string_token(TK_UQSTR)
+                        return nil, s.make_string_token(token.UQSTR)
                     elseif SEP[ch] or CRLF[ch] or BLOCK[ch] or "'" == ch or '"' == ch then
-                        return state.void, s.make_string_token(TK_UQSTR)
+                        return state.void, s.make_string_token(token.UQSTR)
                     else
                         s.next()
                     end
@@ -120,35 +120,34 @@ return function(buffer)
                 -- skip head quote
                 s.next()
                 s.consume()
-                --[[
-                TODO: trim whitespace and linebreak
-                Ch6.1.3 of [rfc7950](https://www.rfc-editor.org/rfc/rfc7950.html)
+                --[[ TODO: trim whitespace and linebreak
+                    Ch6.1.3 of [rfc7950](https://www.rfc-editor.org/rfc/rfc7950.html)
 
-                If a double-quoted string contains a line break followed by space or
-                tab characters that are used to indent the text according to the
-                layout in the YANG file, this leading whitespace is stripped from the
-                string, up to and including the column of the starting double quote
-                character, or to the first non-whitespace character, whichever occurs
-                first.  Any tab character in a succeeding line that must be examined
-                for stripping is first converted into 8 space characters.
-                If a double-quoted string contains space or tab characters before a
-                line break, this trailing whitespace is stripped from the string.
+                    If a double-quoted string contains a line break followed by space or
+                    tab characters that are used to indent the text according to the
+                    layout in the YANG file, this leading whitespace is stripped from the
+                    string, up to and including the column of the starting double quote
+                    character, or to the first non-whitespace character, whichever occurs
+                    first.  Any tab character in a succeeding line that must be examined
+                    for stripping is first converted into 8 space characters.
+                    If a double-quoted string contains space or tab characters before a
+                    line break, this trailing whitespace is stripped from the string.
 
-                A single-quoted string (enclosed within ' ') preserves each character
-                within the quotes.  A single quote character cannot occur in a
-                single-quoted string, even when preceded by a backslash.
+                    A single-quoted string (enclosed within ' ') preserves each character
+                    within the quotes.  A single quote character cannot occur in a
+                    single-quoted string, even when preceded by a backslash.
 
-                Within a double-quoted string (enclosed within " "), a backslash
-                character introduces a representation of a special character, which
-                depends on the character that immediately follows the backslash:
+                    Within a double-quoted string (enclosed within " "), a backslash
+                    character introduces a representation of a special character, which
+                    depends on the character that immediately follows the backslash:
 
-                    \n      newline
-                    \t      a tab character
-                    \"      a double quote
-                    \\      a single backslash
+                        \n      newline
+                        \t      a tab character
+                        \"      a double quote
+                        \\      a single backslash
 
-                The backslash MUST NOT be followed by any other character.
-            ]]
+                    The backslash MUST NOT be followed by any other character.
+                ]]
                 local next_state = state.void
                 while true do
                     local ch = s.peek()
@@ -168,7 +167,7 @@ return function(buffer)
                     end
                     s.next()
                 end
-                local tk = ('"' == quote) and s.make_string_token(TK_DQSTR) or s.make_string_token(TK_SQSTR)
+                local tk = ('"' == quote) and s.make_string_token(token.DQSTR) or s.make_string_token(token.SQSTR)
                 -- skip tail quote
                 s.next()
                 return next_state, tk

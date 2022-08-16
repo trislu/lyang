@@ -24,10 +24,10 @@ SOFTWARE.
 local token = require('token')
 
 local _single_char_token = {
-    [';'] = TK_SCOLON,
-    ['+'] = TK_PLUS,
-    ['{'] = TK_LBRACE,
-    ['}'] = TK_RBRACE
+    [';'] = token.SCOLON,
+    ['+'] = token.PLUS,
+    ['{'] = token.LBRACE,
+    ['}'] = token.RBRACE
 }
 
 return function(buf)

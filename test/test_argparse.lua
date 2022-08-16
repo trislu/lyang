@@ -34,11 +34,8 @@ end
 function test_print_usage()
     local p = argparse()
     local _sandbox = getfenv(p.print_usage)
-    _sandbox.print = function(params)
+    _sandbox.print = function(params_)
         -- sandbox print
-        if params then
-        --print('[sandbox.print]', params)
-        end
     end
     setfenv(p.print_usage, _sandbox)
     local status, err = pcall(p.print_usage)
@@ -101,7 +98,7 @@ function test_parse_args()
     -- test positional argument
     local status, ret = pcall(p.parse_args, {'test.lua'})
     assert_true(status)
-    assert_equal(#ret, 1)
+    assert_equal(1, #ret)
     assert_equal(ret[1], 'test.lua')
     -- test short form
     status, ret = pcall(p.parse_args, {'-t'})

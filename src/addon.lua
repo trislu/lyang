@@ -37,6 +37,8 @@ for file in system.dir(lyang_path .. system.sep() .. 'addons') do
 end
 -- addon table
 local addon_t = {}
+-- formatter table
+local formatter_t = {}
 
 return {
     --- create the abstract 'addon' base object
@@ -47,16 +49,16 @@ return {
         function base:init()
         end
         function base:add_formatter()
-            print('base:add_formatter')
+            --print('base:add_formatter')
         end
         function base:add_option(argparse_)
-            print('base:add_option')
+            --print('base:add_option')
         end
         function base:setup_context(ctx_)
-            print('base:setup_context')
+            --print('base:setup_context')
         end
         function base:convert(ctx_)
-            print('base:do_convert')
+            --print('base:do_convert')
         end
         return base
     end,
@@ -86,5 +88,22 @@ return {
     end,
     find = function(name)
         return addon_t[name]
+    end,
+    add_formatter = function(name, fmt)
+        formatter_t[name] = fmt
+        formatter_t[#formatter_t + 1] = fmt
+    end,
+    list_formatter = function()
+        local i = 0
+        local s = #formatter_t
+        return function()
+            i = i + 1
+            if i <= s then
+                return formatter_t[i]
+            end
+        end
+    end,
+    get_formatter = function(name)
+        return formatter_t[name]
     end
 }

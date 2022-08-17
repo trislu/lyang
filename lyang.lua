@@ -42,7 +42,7 @@ local function main(...)
 
     -- parse arguments
     local ap = argparse()
-    ctx.args = ap.parse_args{...}
+    ctx.args = ap.parse_args {...}
 
     -- print help
     if ctx.args.help then
@@ -50,29 +50,56 @@ local function main(...)
         os.exit(0)
     end
 
-    -- the position arguments are in the array area
-    if 0 == #ctx.args then
+    --[[ limits ]]
+    -- formatter not chosen
+    if not ctx.args.format then
+        error('formatter not chosen')
+    end
+    -- formatter not found
+    local formatter = addon.get_formatter(ctx.args.format)
+    if not formatter then
+        error('formatter "' .. ctx.args.format .. '" not found')
+    end
+    -- number of input files
+    local files = ctx.args
+    if 0 == #files then
         error('missing input files')
-    else
-        if ctx.args.format then
-            local formatter = addon.get_formatter(ctx.args.format)
-            if formatter then
-                if 1 < #ctx.args and not formatter.multiple then
-                    error('too many files to convert')
-                end
-            else
-                error('formatter "' .. ctx.args.format .. '" not found')
-            end
-        else
-            if ctx.args.output then
-                error('formatter not chosen')
-            end
-        end
+    elseif 1 < #files and not formatter.multiple then
+        error('too many files to convert')
     end
 
-    -- setup context after the arguments are parsed
+    --[[ core ]]
+    -- setup context
     for a in addon.list() do
         a:setup_context(ctx)
+    end
+    -- input modules
+    for i = 1, #files do
+        ctx:input_module(files[i])
+    end
+    -- output
+    if ctx.args.output then
+        -- "-o/--output" is specified
+        local tmpname = os.tmpname()
+        local fd = io.open(tmpname, 'w+')
+        local ok, errmsg =
+            xpcall(
+            function()
+                formatter:convert(ctx, fd)
+            end,
+            function()
+                fd:close()
+                os.remove(tmpname)
+            end
+        )
+        if not ok then
+            error(errmsg)
+        end
+        fd:close()
+        os.rename(tmpname, ctx.args.output)
+    else
+        -- write to stdout by default
+        formatter:convert(ctx, io.stdout)
     end
 end
 

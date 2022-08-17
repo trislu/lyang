@@ -57,7 +57,7 @@ return {
         function base:setup_context(ctx_)
             --print('base:setup_context')
         end
-        function base:convert(ctx_)
+        function base:convert(ctx_, fd_)
             --print('base:do_convert')
         end
         return base

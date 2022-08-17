@@ -26,13 +26,13 @@ local modules = require('modules')
 return function()
     local cov_t = {}
     local ctx = {
-        convertors = {
+        converters = {
             add = function(name, cov)
                 if type(name) ~= 'string' then
-                    error "convertor's name must be a string"
+                    error "converter's name must be a string"
                 end
                 if not (cov and cov.convert and type(cov.convert) == 'function') then
-                    error 'convertor must implement a ":convert()" function'
+                    error 'converter must implement a ":convert()" function'
                 end
                 cov_t[name] = cov
                 cov_t[#cov_t + 1] = {cov, name}

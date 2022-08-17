@@ -26,13 +26,13 @@ module('test_context', lunit.testcase, package.seeall)
 
 local context = require('context')
 
-function test_add_convertor()
+function test_add_converter()
     local cov_name = 'foo'
     local cov = {'bar'}
     local ctx = context()
     assert_error(
         function()
-            ctx.convertors.add(cov_name, cov)
+            ctx.converters.add(cov_name, cov)
         end
     )
     cov.convert = function()
@@ -40,12 +40,12 @@ function test_add_convertor()
     end
     assert_pass(
         function()
-            ctx.convertors.add(cov_name, cov)
+            ctx.converters.add(cov_name, cov)
         end
     )
 end
 
-function test_list_convertor()
+function test_list_converter()
     local cov_names = {'alice', 'bob', 'carol', 'dave', 'eve'}
     local cov = {
         convert = function()
@@ -55,19 +55,19 @@ function test_list_convertor()
     for i = 1, #cov_names do
         assert_pass(
             function()
-                ctx.convertors.add(cov_names[i], cov)
+                ctx.converters.add(cov_names[i], cov)
             end
         )
     end
 
     local j = 1
-    for cov_name in ctx.convertors.list() do
+    for cov_name in ctx.converters.list() do
         assert_equal(cov_names[j], cov_name)
         j = j + 1
     end
 end
 
-function test_get_convertor()
+function test_get_converter()
     local cov_names = {'alice', 'bob', 'carol', 'dave', 'eve'}
     local cov = {
         convert = function()
@@ -77,16 +77,16 @@ function test_get_convertor()
     for i = 1, #cov_names do
         assert_pass(
             function()
-                ctx.convertors.add(cov_names[i], cov)
+                ctx.converters.add(cov_names[i], cov)
             end
         )
     end
 
     for j = 1, #cov_names do
-        assert_not_nil(ctx.convertors.get(cov_names[j]))
+        assert_not_nil(ctx.converters.get(cov_names[j]))
     end
 
-    assert_nil(ctx.convertors.get('zack'))
+    assert_nil(ctx.converters.get('zack'))
 end
 
 lunit.main(...)

@@ -46,8 +46,8 @@ return {
         -- luacheck: ignore self
         function base:init()
         end
-        function base:add_convertor(ctx_)
-            --print('base:add_convertor')
+        function base:add_converter(ctx_)
+            --print('base:add_converter')
         end
         function base:add_option(argparse_)
             --print('base:add_option')

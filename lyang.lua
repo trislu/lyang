@@ -40,8 +40,8 @@ local function main(...)
         a:init()
         -- add option to argparse
         a:add_option(argparse)
-        -- add convertor
-        a:add_convertor(ctx)
+        -- add converter
+        a:add_converter(ctx)
         addon.load(source, a)
     end
 
@@ -56,14 +56,14 @@ local function main(...)
     end
 
     --[[ limits ]]
-    -- convertor not chosen
+    -- converter not chosen
     if not ctx.args.cov then
-        error('convertor not chosen')
+        error('converter not chosen')
     end
-    -- convertor not found
-    local cov = ctx.convertors.get(ctx.args.cov)
+    -- converter not found
+    local cov = ctx.converters.get(ctx.args.cov)
     if not cov then
-        error('convertor "' .. ctx.args.cov .. '" not found')
+        error('converter "' .. ctx.args.cov .. '" not found')
     end
     -- number of input files
     local files = ctx.args
@@ -85,7 +85,7 @@ local function main(...)
     -- if the "linker" mode is enbaled
     if ctx.args.link then
         if not cov.multiple then
-            error('only the multi-module convertors can enable the linker mode')
+            error('only the multi-module converters can enable the linker mode')
         end
         local l = linker()
         l.link(ctx)

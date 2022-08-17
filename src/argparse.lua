@@ -174,7 +174,7 @@ return function()
         action = 'store',
         nargs = 1,
         dest = 'cov',
-        help = 'Choose a convertor'
+        help = 'Choose a converter'
     }
     parser.add_argument {
         '-l',

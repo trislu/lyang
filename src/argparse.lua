@@ -178,5 +178,12 @@ return function()
         dest = 'cov',
         help = 'Choose a convertor'
     }
+    parser.add_argument {
+        '-l',
+        '--link',
+        action = 'store_true',
+        dest = 'link',
+        help = 'Enable linker mode'
+    }
     return parser
 end

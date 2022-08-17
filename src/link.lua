@@ -21,16 +21,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
-local addon = require('addon')
-
-local link = addon.create()
--- luacheck: ignore self
-function link:init()
-    --print('link:init')
+return function()
+    local l = {
+        link = function(ctx_)
+        end
+    }
+    return l
 end
-
-function link:setup_context(ctx_)
-    --print('link:setup_context')
-end
-
-return link

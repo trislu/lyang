@@ -82,7 +82,7 @@ local function main(...)
     for i = 1, #files do
         ctx:input_module(files[i])
     end
-    -- if "linker" mode is enbaled
+    -- if the "linker" mode is enbaled
     if ctx.args.link then
         if not cov.multiple then
             error('only the multi-module convertors can enable the linker mode')

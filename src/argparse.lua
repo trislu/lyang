@@ -116,16 +116,12 @@ return function()
                                         'option "' ..
                                             _arg ..
                                                 '" expect ' ..
-                                                    tostring(option.nargs) ..
-                                                        ' arguments while ' .. tostring(nargs) .. ' given'
+                                                    tostring(option.nargs) .. ' arguments while ' .. #nargs .. ' given'
                                     )
                                 end
                             elseif '?' == option.nargs then
                                 if #nargs > 1 then
-                                    error(
-                                        'option "' ..
-                                            _arg .. '" expect 0 or 1 argument while ' .. tostring(nargs) .. ' given'
-                                    )
+                                    error('option "' .. _arg .. '" expect 0 or 1 argument while ' .. #nargs .. ' given')
                                 end
                             elseif '+' == option.nargs then
                                 if #nargs < 1 then
@@ -168,6 +164,7 @@ return function()
         '-o',
         '--output',
         action = 'store',
+        nargs = 1,
         dest = 'output',
         help = 'Save output to file'
     }
@@ -175,6 +172,7 @@ return function()
         '-c',
         '--convert',
         action = 'store',
+        nargs = 1,
         dest = 'cov',
         help = 'Choose a convertor'
     }
@@ -183,7 +181,7 @@ return function()
         '--link',
         action = 'store_true',
         dest = 'link',
-        help = 'Enable linker mode'
+        help = 'Enable the linker mode'
     }
     return parser
 end

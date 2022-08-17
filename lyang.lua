@@ -27,7 +27,7 @@ SOFTWARE.
 local addon = require('addon')
 local argparse = require('argparse')
 local context = require('context')
-local link = require('link')
+local linker = require('linker')
 
 local function main(...)
     -- create context
@@ -80,15 +80,15 @@ local function main(...)
     end
     -- input modules
     for i = 1, #files do
-        ctx:input_module(files[i])
+        ctx.modules.add(files[i])
     end
     -- if the "linker" mode is enbaled
     if ctx.args.link then
         if not cov.multiple then
             error('only the multi-module convertors can enable the linker mode')
         end
-        local linker = link()
-        linker.link(ctx)
+        local l = linker()
+        l.link(ctx)
     end
     -- output
     if ctx.args.output then

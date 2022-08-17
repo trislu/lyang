@@ -21,37 +21,39 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
-local modules = require('modules')
+local parser = require('parser')
 
 return function()
-    local cov_t = {}
-    local ctx = {
-        convertors = {
-            add = function(name, cov)
-                if type(name) ~= 'string' then
-                    error "convertor's name must be a string"
-                end
-                if not (cov and cov.convert and type(cov.convert) == 'function') then
-                    error 'convertor must implement a ":convert()" function'
-                end
-                cov_t[name] = cov
-                cov_t[#cov_t + 1] = {cov, name}
-            end,
-            list = function()
-                local i = 0
-                local s = #cov_t
-                return function()
-                    i = i + 1
-                    if i <= s then
-                        return cov_t[i][2]
-                    end
-                end
-            end,
-            get = function(name)
-                return cov_t[name]
+    local module_t = {}
+    local m = {
+        add = function(file)
+            local p = parser()
+            local err, stmt = p.parse(file)
+            if err then
+                error(err)
             end
-        },
-        modules = modules()
+            if module_t[stmt.argument] then
+                error(
+                    file ..
+                        ': ' ..
+                            stmt.keyword ..
+                                ' name "' ..
+                                    stmt.argument .. '" conflicts, previously defined in ' .. module_t[stmt.argument][2]
+                )
+            end
+            module_t[stmt.argument] = {stmt, file}
+            -- for traverse
+            module_t[#module_t + 1] = stmt
+        end,
+        get = function(name)
+            return module_t[name]
+        end,
+        at = function(index)
+            return module_t[index]
+        end,
+        count = function()
+            return #module_t
+        end
     }
-    return ctx
+    return m
 end

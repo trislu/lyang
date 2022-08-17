@@ -172,11 +172,11 @@ return function()
         help = 'Save output to file'
     }
     parser.add_argument {
-        '-f',
-        '--format',
+        '-c',
+        '--convert',
         action = 'store',
-        dest = 'format',
-        help = 'Choose a formatter'
+        dest = 'cov',
+        help = 'Choose a convertor'
     }
     return parser
 end

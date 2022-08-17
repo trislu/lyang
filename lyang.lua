@@ -35,8 +35,12 @@ local function main(...)
     -- load addons
     for source in addon.scan() do
         local a = require(source)
+        -- useless init() ?
         a:init()
+        -- add option to argparse
         a:add_option(argparse)
+        -- add convertor
+        a:add_convertor(ctx)
         addon.load(source, a)
     end
 
@@ -51,20 +55,20 @@ local function main(...)
     end
 
     --[[ limits ]]
-    -- formatter not chosen
-    if not ctx.args.format then
-        error('formatter not chosen')
+    -- convertor not chosen
+    if not ctx.args.cov then
+        error('convertor not chosen')
     end
-    -- formatter not found
-    local formatter = addon.get_formatter(ctx.args.format)
-    if not formatter then
-        error('formatter "' .. ctx.args.format .. '" not found')
+    -- convertor not found
+    local cov = ctx.convertors.get(ctx.args.cov)
+    if not cov then
+        error('convertor "' .. ctx.args.cov .. '" not found')
     end
     -- number of input files
     local files = ctx.args
     if 0 == #files then
         error('missing input files')
-    elseif 1 < #files and not formatter.multiple then
+    elseif 1 < #files and not cov.multiple then
         error('too many files to convert')
     end
 
@@ -85,7 +89,7 @@ local function main(...)
         local ok, errmsg =
             xpcall(
             function()
-                formatter:convert(ctx, fd)
+                cov:convert(ctx, fd)
             end,
             function()
                 fd:close()
@@ -99,7 +103,7 @@ local function main(...)
         os.rename(tmpname, ctx.args.output)
     else
         -- write to stdout by default
-        formatter:convert(ctx, io.stdout)
+        cov:convert(ctx, io.stdout)
     end
 end
 

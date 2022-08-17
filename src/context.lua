@@ -22,8 +22,33 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 return function()
+    local cov_t = {}
     local ctx = {
-        formatters = {}
+        convertors = {
+            add = function(name, cov)
+                if type(name) ~= 'string' then
+                    error "convertor's name must be a string"
+                end
+                if not (cov and cov.convert and type(cov.convert) == 'function') then
+                    error 'convertor must implement a ":convert()" function'
+                end
+                cov_t[name] = cov
+                cov_t[#cov_t + 1] = {cov, name}
+            end,
+            list = function()
+                local i = 0
+                local s = #cov_t
+                return function()
+                    i = i + 1
+                    if i <= s then
+                        return cov_t[i][2]
+                    end
+                end
+            end,
+            get = function(name)
+                return cov_t[name]
+            end
+        }
     }
     return ctx
 end

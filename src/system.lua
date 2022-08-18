@@ -84,5 +84,9 @@ return {
         splitext = function(url)
             return {url:match('[^' .. _sep .. ']-$'):match('[^.]+'), url:match('%.[^.' .. _sep .. ']+$')}
         end
-    }
+    },
+    move = function(oldname, newname)
+        assert(oldname and newname)
+        return os.execute(('mv %s %s'):format(oldname, newname))
+    end
 }

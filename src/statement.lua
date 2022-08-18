@@ -55,6 +55,19 @@ return function(keyword)
         substmt_count = function()
             return #substmts
         end,
+        find_child = function(k, expect)
+            for i = 1, #substmts do
+                if substmts[i].keyword == k then
+                    if expect then
+                        if expect(substmts[i]) then
+                            return substmts[i]
+                        end
+                    else
+                        return substmts[i]
+                    end
+                end
+            end
+        end,
         syntax = syntax(keyword)
     }
     return stmt

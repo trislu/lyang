@@ -136,7 +136,7 @@ local function create_nfa(mode)
             -- read next token
             self.cur_token = self.lexer.next_token()
             -- check if the statment needs argument string
-            if stmt.syntax.arg then
+            if stmt.syntax.arg() then
                 -- argument string is required
                 if token.UQSTR == self.cur_token.type then
                     return self.meet_unquoted_argument

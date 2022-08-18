@@ -593,6 +593,9 @@ return function(stmt)
         arg = function()
             return yinstmt_syntax[s][1]
         end,
+        yinarg = function()
+            return unpack(yinstmt_syntax[s])
+        end,
         meet = function(substmt)
             if nil == vmap then
                 lasterr = 'not allowed to define substatements for "' .. s .. '"'

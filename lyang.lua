@@ -28,6 +28,7 @@ local addon = require('addon')
 local argparse = require('argparse')
 local context = require('context')
 local linker = require('linker')
+local system = require('system')
 
 local function main(...)
     -- create context
@@ -105,7 +106,7 @@ local function main(...)
         error('converter not chosen')
     end
     -- converter not found
-    local cov = ctx.converters.get(ctx.args.cov)
+    local cov = ctx.converters.get(ctx.args.cov[1])
     if not cov then
         error('unknown converter "' .. ctx.args.cov[1] .. '"')
     end
@@ -145,6 +146,7 @@ local function main(...)
                 cov:convert(ctx, fd)
             end,
             function()
+                print('???')
                 fd:close()
                 os.remove(tmpname)
             end
@@ -153,7 +155,12 @@ local function main(...)
             error(errmsg)
         end
         fd:close()
-        os.rename(tmpname, ctx.args.output)
+        -- try os.rename() firstly
+        local success, _ = os.rename(tmpname, ctx.args.output[1])
+        if not success then
+            -- use os.execute('mv source destination') secondly
+            system.move(tmpname, ctx.args.output[1])
+        end
     else
         -- write to stdout by default
         cov:convert(ctx, io.stdout)

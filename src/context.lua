@@ -51,6 +51,7 @@ return function()
                 return cov_t[name]
             end
         },
+        dependent_modules = {},
         modules = modules()
     }
     return ctx

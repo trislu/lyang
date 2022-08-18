@@ -24,9 +24,15 @@ SOFTWARE.
 local addon = require('addon')
 
 local yin = addon.create()
--- luacheck: ignore self
+
 function yin:init()
-    --print('yin:init')
+    -- yin is a single module converter
+    self.name = 'yin'
+    self.multiple = false
+end
+
+function yin:add_converter(ctx_)
+    ctx_.converters.add(self.name, self)
 end
 
 return yin

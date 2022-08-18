@@ -152,36 +152,5 @@ return function()
             return result
         end
     }
-    -- add default options
-    parser.add_argument {
-        '-h',
-        '--help',
-        action = 'store_true',
-        dest = 'help',
-        help = 'Display this information'
-    }
-    parser.add_argument {
-        '-o',
-        '--output',
-        action = 'store',
-        nargs = 1,
-        dest = 'output',
-        help = 'Save output to file'
-    }
-    parser.add_argument {
-        '-c',
-        '--convert',
-        action = 'store',
-        nargs = 1,
-        dest = 'cov',
-        help = 'Choose a converter'
-    }
-    parser.add_argument {
-        '-l',
-        '--link',
-        action = 'store_true',
-        dest = 'link',
-        help = 'Enable the linker mode'
-    }
     return parser
 end

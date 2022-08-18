@@ -24,13 +24,14 @@ SOFTWARE.
 local addon = require('addon')
 
 local res = addon.create()
--- luacheck: ignore self
 function res:init()
-    --print('res:init')
+    -- res is a single module converter
+    self.name = 'res'
+    self.multiple = false
 end
 
-function res:setup_context(ctx_)
-    --print('res:setup_context')
+function res:add_converter(ctx_)
+    ctx_.converters.add(self.name, self)
 end
 
 return res

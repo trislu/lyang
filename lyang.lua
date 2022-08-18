@@ -47,6 +47,50 @@ local function main(...)
 
     -- parse arguments
     local ap = argparse()
+
+    -- add default options
+    ap.add_argument {
+        '-h',
+        '--help',
+        action = 'store_true',
+        dest = 'help',
+        help = 'Display this information'
+    }
+    ap.add_argument {
+        '-o',
+        '--output',
+        action = 'store',
+        nargs = 1,
+        dest = 'output',
+        help = 'Save output to file'
+    }
+    ap.add_argument {
+        '-c',
+        '--convert',
+        action = 'store',
+        nargs = 1,
+        dest = 'cov',
+        help = 'Choose a converter. \n\t\tSupported converters are: ' ..
+            table.concat(
+                (function()
+                    local cov_list = {}
+                    for name in ctx.converters.list() do
+                        cov_list[#cov_list + 1] = name
+                    end
+                    return cov_list
+                end)(),
+                ', '
+            )
+    }
+    ap.add_argument {
+        '-l',
+        '--link',
+        action = 'store_true',
+        dest = 'link',
+        help = 'Enable the linker mode'
+    }
+
+    -- do parse arguments
     ctx.args = ap.parse_args {...}
 
     -- print help
@@ -63,7 +107,7 @@ local function main(...)
     -- converter not found
     local cov = ctx.converters.get(ctx.args.cov)
     if not cov then
-        error('converter "' .. ctx.args.cov .. '" not found')
+        error('unknown converter "' .. ctx.args.cov[1] .. '"')
     end
     -- number of input files
     local files = ctx.args

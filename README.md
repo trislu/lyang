@@ -1,7 +1,7 @@
 <div align="center">
     <h1>lyang</h1>
     <p align="center">
-        A <b style="color:orange">L</b>ua based <b style="color:orange">YANG</b> validator and converter
+        A <ins><b>L</b></ins>ua based <ins><b>YANG</b></ins> validator and converter
     </p>
     <p>
         <a href="https://github.com/trislu/lyang/actions/workflows/makefile.yml">

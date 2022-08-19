@@ -66,6 +66,14 @@ local function main(...)
         help = 'Save output to file'
     }
     ap.add_argument {
+        '-e',
+        '--extension',
+        action = 'store',
+        nargs = '*',
+        dest = 'extend',
+        help = 'Extension modules'
+    }
+    ap.add_argument {
         '-c',
         '--convert',
         action = 'store',
@@ -123,6 +131,12 @@ local function main(...)
     for a in addon.list() do
         a:setup_context(ctx)
     end
+
+    -- extend modules
+    if ctx.args.extend then
+        ctx.modules.extend(ctx.args.extend)
+    end
+
     -- input modules
     for i = 1, #files do
         ctx.modules.add(files[i])

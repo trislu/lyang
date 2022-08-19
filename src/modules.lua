@@ -55,5 +55,18 @@ return function()
             return #module_t
         end
     }
+
+    function m.extend(extensions)
+        for _, e in ipairs(extensions) do
+            -- add this extension module
+            m.add(e)
+            -- check if any extension definition exists
+            local s = module_t[#module_t]
+            if nil == s.find_child('extension') then
+                error(e .. ': ' .. s.keyword .. ' "' .. s.argument .. '" defines none extensions')
+            end
+        end
+    end
+
     return m
 end

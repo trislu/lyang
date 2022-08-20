@@ -53,7 +53,7 @@ function m.escape(s)
     local e = s
     e = e:gsub('&', '&amp;')
     e = e:gsub('>', '&gt;')
-    e = e:gsub('<', '&gt;')
+    e = e:gsub('<', '&lt;')
     return e
 end
 
@@ -62,12 +62,12 @@ function m.quotedattr(s)
     if q:find('"') then
         if q:find("'") then
             q = q:gsub('"', '&quot;')
-            q = '"'..q..'"'
+            q = '"' .. q .. '"'
         else
-            q = "'"..q.."'"
+            q = "'" .. q .. "'"
         end
     else
-        q = '"'..q..'"'
+        q = '"' .. q .. '"'
     end
     return q
 end

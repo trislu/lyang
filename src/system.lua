@@ -21,29 +21,24 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
-WINDOWS = 1
-UNIX = 2
-
 local _type = nil
-local _sep = nil
 
-local init = function()
-    _sep = package.config:sub(1, 1)
-    if '\\' == _sep then
-        _type = WINDOWS
-    elseif '/' == _sep then
-        _type = UNIX
-    else
-        -- statements
-        error('[system] unknown sep character = ', _sep)
-    end
-end
+local _WIN = 1
+local _UNIX = 2
 
-if nil == _sep then
-    init()
+local _sep = package.config:sub(1, 1)
+if '\\' == _sep then
+    _type = _WIN
+elseif '/' == _sep then
+    _type = _UNIX
+else
+    -- statements
+    error('[system] unknown sep character = ', _sep)
 end
 
 return {
+    WINDOWS = _WIN,
+    UNIX = _UNIX,
     type = function()
         return _type
     end,
@@ -56,12 +51,12 @@ return {
             return lfs.dir(path)
         end
         local cmd = nil
-        if WINDOWS == _type then
+        if _WIN == _type then
             cmd = ('dir %s /b /A-D'):format(path:gsub('/', '\\'))
-        elseif UNIX == _type then
+        elseif _UNIX == _type then
             cmd = ("find '%s' -mindepth 1 -maxdepth 1 -type f -print"):format(path)
         else
-            -- unlikely
+            error('[system] unknown system type =', _type)
         end
         --check https://www.lua.org/manual/5.1/manual.html#pdf-io.popen
         local pret = io.popen(cmd, 'r')

@@ -25,10 +25,7 @@ require('lunit')
 module('test_system', lunit.testcase, package.seeall)
 
 local system = require('system')
-local _type = {
-    win = WINDOWS,
-    unix = UNIX
-}
+
 local sep = package.config:sub(1, 1)
 
 function test_sep()
@@ -37,9 +34,9 @@ end
 
 function test_type()
     if '/' == sep then
-        assert_equal(_type.unix, system.type())
+        assert_equal(system.UNIX, system.type())
     elseif '\\' == sep then
-        assert_equal(_type.win, system.type())
+        assert_equal(system.WINDOWS, system.type())
     end
 end
 

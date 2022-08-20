@@ -72,4 +72,16 @@ function m.quotedattr(s)
     return q
 end
 
+function m.decouple_nodeid(id)
+    local s = id:split(':')
+    if 1 == #s then
+        return true, nil, id
+    elseif 2 == #s then
+        if #(s[1]) > 0 then
+            return true, s[1], s[2]
+        end
+    end
+    return false
+end
+
 return m

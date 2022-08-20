@@ -41,8 +41,7 @@ end
 local function convert_stmt(ctx, mod, stmt, fd)
     -- the statement is validated already
     local arg_ident, child_elem = nil, false
-    local split = string.split(stmt.keyword, ':') -- luacheck: ignore
-    local prefix, ident = split[#split - 1], split[#split]
+    local _, prefix, ident = utils.decouple_nodeid(stmt.keyword)
     if prefix then
         -- prefix comes from which import
         local import_stmt =

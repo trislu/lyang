@@ -48,4 +48,20 @@ function test_xml_quotedattr()
     assert_equal('"[name]"', utils.quotedattr('[name]'))
 end
 
+function test_decouple_nodeid()
+    local ok, prefix, indent = utils.decouple_nodeid('bob')
+    assert_true(ok)
+    assert_nil(prefix)
+    assert_equal('bob', indent)
+
+    ok, prefix, indent = utils.decouple_nodeid('a:b')
+    assert_true(ok)
+    assert_equal('a', prefix)
+    assert_equal('b', indent)
+
+    assert_false(utils.decouple_nodeid(':b'))
+    assert_false(utils.decouple_nodeid('a::b'))
+    assert_false(utils.decouple_nodeid('a:b:c'))
+end
+
 lunit.main(...)

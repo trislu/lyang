@@ -25,6 +25,7 @@ local parser = require('parser')
 
 return function()
     local module_t = {}
+    local namespace_t = {}
     local m = {
         add = function(file)
             local p = parser()
@@ -41,12 +42,27 @@ return function()
                                     stmt.argument .. '" conflicts, previously defined in ' .. module_t[stmt.argument][2]
                 )
             end
+            local namespace_stmt = stmt.find_child('namespace')
+            if namespace_t[namespace_stmt.argument] then
+                error(
+                    file ..
+                        ': ' ..
+                            stmt.keyword ..
+                                ' namespace "' ..
+                                    namespace_stmt.argument ..
+                                        '" conflicts, previously defined in ' .. module_t[stmt.argument][2]
+                )
+            end
             module_t[stmt.argument] = {stmt, file}
+            namespace_stmt[namespace_stmt.argument] = stmt
             -- for traverse
             module_t[#module_t + 1] = stmt
         end,
         get = function(name)
-            return module_t[name]
+            return module_t[name][1]
+        end,
+        get_source = function(name)
+            return module_t[name][2]
         end,
         at = function(index)
             return module_t[index]

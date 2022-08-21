@@ -29,6 +29,7 @@ local argparse = require('argparse')
 local context = require('context')
 local linker = require('linker')
 local system = require('system')
+local parser = require('parser')
 
 local function main(...)
     -- create context
@@ -134,12 +135,23 @@ local function main(...)
 
     -- extend modules
     if ctx.args.extend then
-        ctx.modules.extend(ctx.args.extend)
+        for i = 0, #ctx.args.extend do
+            local p = parser(ctx)
+            local err = p.parse(ctx.args.extend[i])
+            if err then
+                error(err)
+            end
+        end
     end
+    ctx.modules.do_extend()
 
     -- input modules
     for i = 1, #files do
-        ctx.modules.add(files[i])
+        local p = parser(ctx)
+        local err = p.parse(files[i])
+        if err then
+            error(err)
+        end
     end
     -- if the "linker" mode is enbaled
     if ctx.args.link then

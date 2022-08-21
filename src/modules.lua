@@ -23,67 +23,105 @@ SOFTWARE.
 ]]
 assert(..., [[this is a require only module, don't use it as the main]])
 
-local parser = require('parser')
+local utils = require('utils')
 
 return function()
     local module_t = {}
     local namespace_t = {}
+    local extended = false
     local m = {
-        add = function(file)
-            local p = parser()
-            local err, stmt = p.parse(file)
-            if err then
-                error(err)
-            end
-            if module_t[stmt.argument] then
-                error(
-                    file ..
-                        ': ' ..
-                            stmt.keyword ..
-                                ' name "' ..
-                                    stmt.argument .. '" conflicts, previously defined in ' .. module_t[stmt.argument][2]
-                )
-            end
-            local namespace_stmt = stmt.find_child('namespace')
-            if namespace_t[namespace_stmt.argument] then
-                error(
-                    file ..
-                        ': ' ..
-                            stmt.keyword ..
-                                ' namespace "' ..
-                                    namespace_stmt.argument ..
-                                        '" conflicts, previously defined in ' .. module_t[stmt.argument][2]
-                )
-            end
-            module_t[stmt.argument] = {stmt, file}
-            namespace_stmt[namespace_stmt.argument] = stmt
+        add = function(mod, source, meta)
+            module_t[mod.argument] = {mod, source, meta}
             -- for traverse
-            module_t[#module_t + 1] = stmt
+            module_t[#module_t + 1] = mod
         end,
         get = function(name)
-            return module_t[name][1]
+            if module_t[name] then
+                return module_t[name][1]
+            end
+            return nil
+        end,
+        add_namespace = function(ns, source)
+            namespace_t[ns.argument] = {ns, source}
+        end,
+        get_namespace = function(ns)
+            return namespace_t[ns]
         end,
         get_source = function(name)
-            return module_t[name][2]
+            if module_t[name] then
+                return module_t[name][2]
+            end
+            return nil
+        end,
+        get_meta = function(name)
+            if module_t[name] then
+                return module_t[name][3]
+            end
+            return nil
         end,
         at = function(index)
             return module_t[index]
         end,
         count = function()
             return #module_t
+        end,
+        extended = function()
+            return extended
         end
     }
 
-    function m.extend(extensions)
-        for _, e in ipairs(extensions) do
-            -- add this extension module
-            m.add(e)
-            -- check if any extension definition exists
-            local s = module_t[#module_t]
-            if nil == s.find_child('extension') then
-                error(e .. ': ' .. s.keyword .. ' "' .. s.argument .. '" defines none extensions')
+    function m.do_extend()
+        -- check all extended keywords for loaded modules
+        for _, mod in ipairs(module_t) do
+            -- must define some extension
+            local meta = m.get_meta(mod.argument)
+            if 0 == #(meta.extensions) then
+                error(
+                    m.get_source(mod.argument) ..
+                        ': ' .. mod.keyword .. ' "' .. mod.argument .. '" defines none extensions'
+                )
+            end
+            -- handle pending extended keywords
+            if meta.pending_extended_keywords then
+                for _, ext in ipairs(meta.pending_extended_keywords) do
+                    local keyword_stmt, import_modname = ext[1], ext[2]
+                    if nil == module_t[import_modname] then
+                        local source = m.get_source(mod.argument)
+                        error(
+                            ('%s:%d:%d: can not find import module "%s" of keyword "%s"'):format(
+                                source,
+                                keyword_stmt.position.line,
+                                keyword_stmt.position.col,
+                                import_modname,
+                                keyword_stmt.argument
+                            )
+                        )
+                    end
+                    -- import module does exist
+                    local def_meta = m.get_meta(import_modname)
+                    assert(nil ~= def_meta)
+                    local _, _, ident = utils.decouple_nodeid(keyword_stmt.argument)
+                    local def_extension = def_meta.extensions[ident]
+                    if nil == def_extension then
+                        local source = m.get_source(mod.argument)
+                        error(
+                            ('%s:%d:%d: can not find extension "%s" from module "%s" for keyword "%s"'):format(
+                                source,
+                                keyword_stmt.position.line,
+                                keyword_stmt.position.col,
+                                ident,
+                                import_modname,
+                                keyword_stmt.argument
+                            )
+                        )
+                    end
+                end
+                -- clear for GC
+                meta.pending_extended_keywords = nil
             end
         end
+        -- mark the whole module repository as "extended"
+        extended = true
     end
 
     return m

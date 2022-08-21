@@ -24,14 +24,13 @@ SOFTWARE.
 require('lunit')
 module('test_parser', lunit.testcase, package.seeall)
 
+local context = require('context')
 local parser = require('parser')
 
 function test_empty_module()
-    local mod = [[
-        module foo {}
-    ]]
-    local p = parser()
-    local err, root = p.parse_string(mod)
+    local ctx = context()
+    local p = parser(ctx)
+    local err, root = p.parse('./test_parser_1')
     assert_string(err)
     assert_table(root)
     assert_equal('module', root.keyword)
@@ -39,16 +38,9 @@ function test_empty_module()
 end
 
 function test_valid_module()
-    local mod =
-        [[
-        module foo {
-            yang-version 1.1;
-            prefix f;
-            namespace "http://lyang/foo";
-        }
-    ]]
-    local p = parser()
-    local err, root = p.parse_string(mod)
+    local ctx = context()
+    local p = parser(ctx)
+    local err, root = p.parse('./test_parser_2')
     assert_nil(err)
     assert_table(root)
     assert_equal('module', root.keyword)

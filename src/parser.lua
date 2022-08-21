@@ -28,8 +28,9 @@ local token = require('token')
 local buffer = require('buffer')
 local lex = require('lex')
 local statement = require('statement')
+local pass = require('pass')
 
-local function create_nfa(mode)
+local function create_nfa(ctx)
     -- Non-Deterministic Finite Automata
     local nfa = {
         -- inputs
@@ -44,11 +45,14 @@ local function create_nfa(mode)
         -- extension tree mark
         extension_root = nil,
         -- error record
-        lasterr = nil
+        lasterr = nil,
+        -- context
+        context = ctx
     }
 
     local trace = function(...)
-        if 'debug' == mode then
+        -- TODO: debug level
+        if ctx.args and 'debug' == ctx.args.mode then
             return print(...)
         end
     end
@@ -259,6 +263,8 @@ local function create_nfa(mode)
     --[[begin substatement]]
     function nfa:begin_substatement()
         trace('nfa:begin_substatement()')
+        -- run syntatic pass for this statement
+        pass.run_syntactic_pass(self.stmt_stack.top(), self.stmt_stack.bottom(), self.context, self.filename)
         -- read next token
         self.cur_token = self.lexer.next_token()
         -- exntension subtree?
@@ -316,6 +322,8 @@ local function create_nfa(mode)
     -- [[end statement]]
     function nfa:end_statement()
         trace('nfa:end_statement()')
+        -- run syntatic pass for this statement
+        pass.run_syntactic_pass(self.stmt_stack.top(), self.stmt_stack.bottom(), self.context, self.filename)
         if self.extension_root then
             --[[TOOD:verify extension syntax?]]
             if self.extension_root == self.stmt_stack.size() then
@@ -354,15 +362,15 @@ local function create_nfa(mode)
     return nfa
 end
 
-return function(mode)
+return function(ctx)
     local p = {
         parse = function(f)
-            local nfa = create_nfa(mode)
+            local nfa = create_nfa(ctx)
             nfa:load(f)
             return nfa:run()
         end,
         parse_string = function(s)
-            local nfa = create_nfa(mode)
+            local nfa = create_nfa(ctx)
             nfa:loadstring(s)
             return nfa:run()
         end

@@ -23,7 +23,7 @@ SOFTWARE.
 ]]
 assert(
     ...,
-    [[ this is a require only module, don't use it as the main
+    [[this is a require only module, don't use it as the main
 usage:
     local ro = require('readonly')
     local foo = ro({bar='ok'})

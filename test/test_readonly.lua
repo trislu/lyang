@@ -36,7 +36,6 @@ function test_ro()
             return {foo = 'bar'}
         end
     }
-    --assert_equal(';', tk3.content)
     assert_equal('alice', ro.alice)
     assert_equal('bob', ro.bob[1])
     assert_equal(42, ro[1])

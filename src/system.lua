@@ -21,6 +21,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
+assert(..., [[this is a require only module, don't use it as the main]])
+
+local readonly = require('readonly')
+
 local _type = nil
 
 local _WIN = 1
@@ -36,7 +40,7 @@ else
     error('[system] unknown sep character = ', _sep)
 end
 
-return {
+return readonly {
     WINDOWS = _WIN,
     UNIX = _UNIX,
     type = function()

@@ -21,6 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
+assert(..., [[this is a require only module, don't use it as the main]])
+
 local validate_option = function(option)
     if 'table' == type(option) then
         if #option == 0 then

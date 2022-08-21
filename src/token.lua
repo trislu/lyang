@@ -21,17 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
-local ts = {
-    'unquoted string', -- 1
-    'single quoted string', -- 2
-    'double quoted string', -- 3
-    '+', -- 4
-    ';', -- 5
-    '{', -- 6
-    '}' -- 7
-}
+assert(..., [[this is a require only module, don't use it as the main]])
 
-return {
+local readonly = require('readonly')
+
+local m = {
     UQSTR = 1,
     SQSTR = 2,
     DQSTR = 3,
@@ -47,8 +41,21 @@ return {
             col = col
         }
         return t
-    end,
-    typename = function(t)
-        return ts[t]
     end
 }
+
+local ts = {
+    [m.UQSTR] = 'unquoted string', -- 1
+    [m.SQSTR] = 'single quoted string', -- 2
+    [m.DQSTR] = 'double quoted string', -- 3
+    [m.PLUS] = '+', -- 4
+    [m.SCOLON] = ';', -- 5
+    [m.LBRACE] = '{', -- 6
+    [m.RBRACE] = '}' -- 7
+}
+
+function m.typename(t)
+    return ts[t]
+end
+
+return readonly(m)

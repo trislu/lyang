@@ -97,4 +97,16 @@ function test_tokenize_feature_expr()
     assert_equal(')', tokens[10])
 end
 
+function test_match_positive_integer()
+    for i = 1, 65536 do
+        local s = tostring(i)
+        assert_true(utils.is_postive_integer(s), s .. ' is not a positive integer')
+    end
+
+    assert_false(utils.is_postive_integer('-123'))
+    assert_false(utils.is_postive_integer('0123'))
+    assert_false(utils.is_postive_integer('123.'))
+    assert_false(utils.is_postive_integer('123 '))
+end
+
 lunit.main(...)

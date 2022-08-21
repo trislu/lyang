@@ -134,4 +134,8 @@ function m.tokenize_feature_expr(exp)
     return tokens
 end
 
+function m.is_postive_integer(str)
+    return str == str:match('[1-9]%d*')
+end
+
 return m

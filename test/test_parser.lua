@@ -64,4 +64,9 @@ function test_valid_module()
     assert_equal(0, sub3.substmt_count())
 end
 
-lunit.main(...)
+pcall(
+    function(r)
+        os.exit(r.failed + r.errors)
+    end,
+    lunit.main(...)
+)

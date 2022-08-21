@@ -87,4 +87,9 @@ function test_path_splitext()
     assert_nil(r[2])
 end
 
-lunit.main(...)
+pcall(
+    function(r)
+        os.exit(r.failed + r.errors)
+    end,
+    lunit.main(...)
+)

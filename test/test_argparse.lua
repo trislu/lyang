@@ -130,4 +130,9 @@ function test_parse_args()
     assert_equal('b', ret.result[2])
 end
 
-lunit.main(...)
+pcall(
+    function(r)
+        os.exit(r.failed + r.errors)
+    end,
+    lunit.main(...)
+)

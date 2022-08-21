@@ -53,4 +53,9 @@ function test_create2()
     assert_equal(tk2.col, 7)
 end
 
-lunit.main(...)
+pcall(
+    function(r)
+        os.exit(r.failed + r.errors)
+    end,
+    lunit.main(...)
+)

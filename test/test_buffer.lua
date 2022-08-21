@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
-
 require('lunit')
 module('test_buffer', lunit.testcase, package.seeall)
 
@@ -77,4 +76,9 @@ function test_clear()
     assert_equal(b.len(), 0)
 end
 
-lunit.main(...)
+pcall(
+    function(r)
+        os.exit(r.failed + r.errors)
+    end,
+    lunit.main(...)
+)

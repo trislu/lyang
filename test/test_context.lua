@@ -89,4 +89,9 @@ function test_get_converter()
     assert_nil(ctx.converters.get('zack'))
 end
 
-lunit.main(...)
+pcall(
+    function(r)
+        os.exit(r.failed + r.errors)
+    end,
+    lunit.main(...)
+)

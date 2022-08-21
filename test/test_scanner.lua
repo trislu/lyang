@@ -87,4 +87,9 @@ function test_make_token()
     assert_equal('world', tk3.content)
 end
 
-lunit.main(...)
+pcall(
+    function(r)
+        os.exit(r.failed + r.errors)
+    end,
+    lunit.main(...)
+)

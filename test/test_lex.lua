@@ -182,4 +182,9 @@ function test_block_comment()
     assert_equal(';', tk3.content)
 end
 
-lunit.main(...)
+pcall(
+    function(r)
+        os.exit(r.failed + r.errors)
+    end,
+    lunit.main(...)
+)

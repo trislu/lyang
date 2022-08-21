@@ -109,4 +109,9 @@ function test_match_positive_integer()
     assert_false(utils.is_postive_integer('123 '))
 end
 
-lunit.main(...)
+pcall(
+    function(r)
+        os.exit(r.failed + r.errors)
+    end,
+    lunit.main(...)
+)

@@ -85,4 +85,9 @@ function test_stack_bottom()
     assert_nil(s.bottom())
 end
 
-lunit.main(...)
+pcall(
+    function(r)
+        os.exit(r.failed + r.errors)
+    end,
+    lunit.main(...)
+)

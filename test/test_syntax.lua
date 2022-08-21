@@ -134,4 +134,9 @@ function test_module_unique_substmt()
     assert_equal(s_module.lasterr(), '"module" can only contain one "prefix" substatement')
 end
 
-lunit.main(...)
+pcall(
+    function(r)
+        os.exit(r.failed + r.errors)
+    end,
+    lunit.main(...)
+)

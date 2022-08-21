@@ -86,4 +86,52 @@ function m.decouple_nodeid(id)
     return false
 end
 
+local CRLF = {
+    ['\r'] = 1,
+    ['\n'] = 1
+}
+
+local SEP = {
+    [' '] = 1,
+    ['\t'] = 1,
+    ['\v'] = 1,
+    ['\f'] = 1
+}
+
+function m.tokenize_feature_expr(exp)
+    local buf = {}
+    for i = 1, string.len(exp) do
+        table.insert(buf, string.sub(exp, i, i))
+    end
+    -- trick : add " " as EOF
+    buf[#buf + 1] = ' '
+    local consume = 0
+    local tokens = {}
+    local state = nil
+    for j = 1, #buf do
+        if '(' == buf[j] or ')' == buf[j] then
+            if 'str' == state then
+                local str = table.concat(buf, nil, consume, j - 1)
+                tokens[#tokens + 1] = str
+            end
+            tokens[#tokens + 1] = buf[j]
+            consume = j
+            state = nil
+        elseif SEP[buf[j]] or CRLF[buf[j]] then
+            if 'str' == state then
+                local str = table.concat(buf, nil, consume, j - 1)
+                tokens[#tokens + 1] = str
+            end
+            consume = j
+            state = nil
+        else
+            if nil == state then
+                state = 'str'
+                consume = j
+            end
+        end
+    end
+    return tokens
+end
+
 return m

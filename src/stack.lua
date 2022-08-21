@@ -39,6 +39,9 @@ return function()
         end,
         size = function()
             return #s
+        end,
+        bottom = function()
+            return s[1]
         end
     }
 end

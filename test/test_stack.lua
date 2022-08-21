@@ -72,4 +72,17 @@ function test_stack_top()
     end
 end
 
+function test_stack_bottom()
+    local s = stack()
+    for i = 1, 10 do
+        -- statements
+        s.push(i * 2)
+        assert_equal(2, s.bottom())
+    end
+    while s.size() > 0 do
+        s.pop()
+    end
+    assert_nil(s.bottom())
+end
+
 lunit.main(...)

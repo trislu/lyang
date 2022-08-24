@@ -591,10 +591,10 @@ local semantic_pass = {
 }
 
 return {
-    syntactic_pass = function()
+    syntactic_passes = function()
         return syntactic_pass
     end,
-    semantic_pass = function()
+    semantic_passes = function()
         return semantic_pass
     end
 }

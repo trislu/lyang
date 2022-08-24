@@ -26,15 +26,17 @@ assert(..., [[this is a require only module, don't use it as the main]])
 local utils = require('utils')
 local validate = require('validate')
 
-local syntactic_pipeline = {validate.syntactic_pass()}
-local semantic_pipeline = {validate.semantic_pass()}
+local syntactic_pipeline = {validate.syntactic_passes()}
+local semantic_pipeline = {validate.semantic_passes()}
 
 return {
     run_syntactic_pass = function(stmt, mod, ctx, source)
         for _, passes in ipairs(syntactic_pipeline) do
-            local pass = passes[stmt.keyword]
-            if pass then
-                pass(stmt, mod, ctx, source)
+            local keyword_passes = passes[stmt.keyword]
+            if keyword_passes then
+                for _, pass in ipairs(keyword_passes) do
+                    pass(stmt, mod, ctx, source)
+                end
             else
                 -- extended-stmt pass
                 local ok, prefix, ident = utils.decouple_nodeid(stmt.keyword)
@@ -112,11 +114,13 @@ return {
     end,
     run_semantic_pass = function(stmt, mod, ctx, source)
         for _, passes in ipairs(semantic_pipeline) do
-            local pass = passes[stmt.keyword]
-            if pass then
-                pass(stmt, mod, ctx, source)
-            end
+            local keyword_passes = passes[stmt.keyword]
+            if keyword_passes then
+                for _, pass in ipairs(keyword_passes) do
+                    pass(stmt, mod, ctx, source)
+                end
             -- custom extended keywords?
+            end
         end
     end
 }

@@ -24,648 +24,99 @@ SOFTWARE.
 assert(..., [[this is a require only module, don't use it as the main]])
 
 local utils = require('utils')
+local validate = require('validate')
 
-local feature_rsv_tokens = {
-    ['('] = 1,
-    [')'] = 1,
-    ['and'] = 1,
-    ['or'] = 1,
-    ['not'] = 1
-}
-
-local syntactic_pass = {
-    action = {},
-    anydata = {},
-    anyxml = {},
-    argument = {},
-    augment = {
-        function(stmt, mod, ctx, source)
-            local argument = stmt.argument
-            local errmsg = nil
-            if 'uses' == stmt.parent.keyword then
-                -- 'uses-augment-stmt'
-                if '/' == argument[1] then
-                    errmsg = 'argument of the uses-augment statement must be a "descendant-schema-nodeid"'
-                else
-                    local slice = argument:split('/')
-                    -- "" == slice[1]
-                    for i = 1, #slice do
-                        local ok, prefix, _ = utils.decouple_nodeid(slice[i])
-                        if not ok then
-                            errmsg = ('invalid argument descendant-schema-nodeid[%d]"%s"'):format(i - 1, slice[i])
-                            break
-                        end
-                        local meta = ctx.modules.get_meta(mod.argument)
-                        if nil == meta.prefixes[prefix] then
-                            errmsg =
-                                ('undefined prefix "%s" in descendant-schema-nodeid[%d]"%s"'):format(
-                                prefix,
-                                i - 1,
-                                slice[i]
-                            )
-                            break
-                        end
-                    end
-                end
-            else
-                -- 'augment-stmt'
-                if '/' ~= argument[1] then
-                    errmsg = 'argument of the augment statement must be an "absolute-schema-nodeid"'
-                else
-                    local slice = argument:split('/')
-                    -- "" == slice[1]
-                    for i = 2, #slice do
-                        local ok, prefix, _ = utils.decouple_nodeid(slice[i])
-                        if not ok then
-                            errmsg = ('invalid argument absolute-schema-nodeid[%d]"%s"'):format(i - 1, slice[i])
-                            break
-                        end
-                        local meta = ctx.modules.get_meta(mod.argument)
-                        if nil == meta.prefixes[prefix] then
-                            errmsg =
-                                ('undefined prefix "%s" in absolute-schema-nodeid[%d]"%s"'):format(
-                                prefix,
-                                i - 1,
-                                slice[i]
-                            )
-                            break
-                        end
-                    end
-                end
-            end
-            if errmsg then
-                error(source .. ':' .. stmt.position.line .. ':' .. stmt.position.col .. ': ' .. errmsg)
-            end
-        end
-    },
-    base = {},
-    ['belongs-to'] = {},
-    bit = {},
-    case = {},
-    choice = {},
-    config = {},
-    contact = {},
-    container = {},
-    default = {},
-    description = {},
-    deviate = {},
-    deviation = {},
-    enum = {},
-    ['error-app-tag'] = {},
-    ['error-message'] = {},
-    extension = {
-        function(stmt, mod, ctx, source)
-            -- module's meta info
-            local meta = ctx.modules.get_meta(mod.argument)
-            -- update 'extensions' field
-            if meta.extensions[stmt.argument] then
-                -- extension redefinition
-                local previous = meta.extensions[stmt.argument]
-                error(
-                    ('%s:%d:%d: extension "%s" conflict, previously defined in :%d:%d'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col,
-                        stmt.argument,
-                        previous.position.line,
-                        previous.position.line
-                    )
-                )
-            end
-            -- record extension stmt
-            meta.extensions[stmt.argument] = stmt
-            meta.extensions[#meta.extensions + 1] = stmt
-        end
-    },
-    feature = {},
-    ['fraction-digits'] = {},
-    grouping = {},
-    identity = {},
-    ['if-feature'] = {
-        function(stmt, mod, ctx, source)
-            local tokens = utils.tokenize_feature_expr(stmt.argument)
-            for _, tk in ipairs(tokens) do
-                -- not a reserve token
-                if nil ~= feature_rsv_tokens[tk] then
-                    local ok, prefix, _ = utils.decouple_nodeid(stmt.keyword)
-                    if not ok then
-                        error(
-                            ('%s:%d:%d: invalid if-feature argument "%s"'):format(
-                                source,
-                                stmt.position.line,
-                                stmt.position.col,
-                                stmt.argument
-                            )
-                        )
-                    end
-                    local meta = ctx.modules.get_meta(mod.argument)
-                    if nil == meta.prefixes[prefix] then
-                        error(
-                            ('%s:%d:%d: undefined prefix "%s" in if-feature argument "%s"'):format(
-                                source,
-                                stmt.position.line,
-                                stmt.position.col,
-                                prefix,
-                                stmt.argument
-                            )
-                        )
-                    end
-                end
-            end
-        end
-    },
-    import = {
-        function(stmt, mod, ctx, source)
-            -- module's meta info
-            local meta = ctx.modules.get_meta(mod.argument)
-            -- check 'imports' field
-            if meta.imports[stmt.argument] then
-                -- import conflict
-                local previous = meta.imports[stmt.argument]
-                error(
-                    ('%s:%d:%d: import "%s" conflict, previously defined in :%d:%d'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col,
-                        stmt.argument,
-                        previous.position.line,
-                        previous.position.line
-                    )
-                )
-            end
-            -- record import stmt
-            meta.imports[stmt.argument] = stmt
-        end
-    },
-    include = {
-        function(stmt, mod, ctx, source)
-            -- module's meta info
-            local meta = ctx.modules.get_meta(mod.argument)
-            -- check 'includes' field
-            if meta.includes[stmt.argument] then
-                -- include conflict
-                local previous = meta.includes[stmt.argument]
-                error(
-                    ('%s:%d:%d: include "%s" conflict, previously defined in :%d:%d'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col,
-                        stmt.argument,
-                        previous.position.line,
-                        previous.position.line
-                    )
-                )
-            end
-            -- record include stmt
-            meta.includes[stmt.argument] = stmt
-        end
-    },
-    input = {},
-    key = {},
-    leaf = {},
-    ['leaf-list'] = {},
-    length = {},
-    list = {},
-    mandatory = {},
-    ['max-elements'] = {
-        function(stmt, mod_, ctx_, source)
-            if not utils.is_postive_integer(stmt.argument) and 'unbounded' ~= stmt.argument then
-                error(
-                    ('%s:%d:%d: invalid argument of "max-elements", must be positive integer or "unbounded"'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col
-                    )
-                )
-            end
-        end
-    },
-    ['min-elements'] = {
-        function(stmt, mod_, ctx_, source)
-            if not utils.is_postive_integer(stmt.argument) and '0' ~= stmt.argument then
-                error(
-                    ('%s:%d:%d: invalid argument of "min-elements", must be none negative integer'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col
-                    )
-                )
-            end
-        end
-    },
-    modifier = {},
-    module = {
-        function(stmt, mod, ctx, source)
-            -- check conflict
-            local conflict = ctx.modules.get_source(mod.argument)
-            if conflict then
-                error(
-                    ('%s:%d:%d: %s name "%s" conflicts, previously defined in %s'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col,
-                        mod.keyword,
-                        mod.argument,
-                        conflict
-                    )
-                )
-            end
-            -- create meta fields
-            local meta = {
-                imports = {},
-                prefixes = {},
-                includes = {},
-                extensions = {}
-            }
-            -- add to modules
-            ctx.modules.add(mod, source, meta)
-        end
-    },
-    must = {},
-    namespace = {
-        function(stmt, mod_, ctx, source)
-            local conflict = ctx.modules.get_namespace(stmt.argument)
-            if conflict then
-                local previous = conflict[2]
-                error(
-                    ('%s:%d:%d: conflict %s "%s", previously defined in %s'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col,
-                        stmt.keyword,
-                        stmt.argument,
-                        previous
-                    )
-                )
-            end
-            -- add to modules
-            ctx.modules.add_namespace(stmt, source)
-        end
-    },
-    notification = {},
-    ['ordered-by'] = {
-        function(stmt, mod_, ctx_, source)
-            if 'user' ~= stmt.argument and 'system' ~= stmt.argument then
-                error(
-                    ('%s:%d:%d: invalid argument of "ordered-by", must be "user" or "system"'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col
-                    )
-                )
-            end
-        end
-    },
-    organization = {},
-    output = {},
-    path = {
-        function(stmt, mod, ctx, source)
-            local argument = stmt.argument
-            local slice = argument:split('/')
-            local errmsg = nil
-            for i = 1, #slice do
-                local nodeid = slice[i]
-                if '' ~= nodeid and '.' ~= nodeid and '..' ~= nodeid then
-                    local ok, prefix, _ = utils.decouple_nodeid(slice[i])
-                    if not ok then
-                        errmsg = ('invalid argument of path[%d]"%s"'):format(i - 1, slice[i])
-                        break
-                    end
-                    local meta = ctx.modules.get_meta(mod.argument)
-                    if nil == meta.prefixes[prefix] then
-                        errmsg = ('undefined prefix "%s" in path[%d]"%s"'):format(prefix, i - 1, slice[i])
-                        break
-                    end
-                end
-            end
-            if errmsg then
-                error(('%s:%d:%d: %s'):format(source, stmt.position.line, stmt.position.col))
-            end
-        end
-    },
-    pattern = {},
-    position = {
-        function(stmt, mod_, ctx_, source)
-            if not utils.is_postive_integer(stmt.argument) and '0' ~= stmt.argument then
-                error(
-                    ('%s:%d:%d: invalid argument of "position", must be none negative integer'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col
-                    )
-                )
-            end
-        end
-    },
-    prefix = {
-        function(stmt, mod, ctx, source)
-            -- module's meta info
-            local meta = ctx.modules.get_meta(mod.argument)
-            -- update 'prefixes' field
-            if nil == meta.prefixes then
-                meta.prefixes = {}
-            end
-            if meta.prefixes[stmt.argument] then
-                -- prefix conflict
-                local previous = meta.prefixes[stmt.argument]
-                error(
-                    ('%s:%d:%d: prefix "%s" conflict, previously defined in :%d:%d'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col,
-                        stmt.argument,
-                        previous.position.line,
-                        previous.position.line
-                    )
-                )
-            end
-            -- record prefix stmt
-            meta.prefixes[stmt.argument] = stmt
-        end
-    },
-    presence = {},
-    range = {},
-    reference = {},
-    refine = {
-        function(stmt, mod, ctx, source)
-            local argument = stmt.argument
-            local errmsg = nil
-            -- 'uses-augment-stmt'
-            if '/' == argument[1] then
-                errmsg = 'argument of the uses-augment statement must be a "descendant-schema-nodeid"'
-            else
-                local slice = argument:split('/')
-                -- "" == slice[1]
-                for i = 1, #slice do
-                    local ok, prefix, _ = utils.decouple_nodeid(slice[i])
-                    if not ok then
-                        errmsg = ('invalid argument descendant-schema-nodeid[%d]"%s"'):format(i - 1, slice[i])
-                        break
-                    end
-                    local meta = ctx.modules.get_meta(mod.argument)
-                    if nil == meta.prefixes[prefix] then
-                        errmsg =
-                            ('undefined prefix "%s" in descendant-schema-nodeid[%d]"%s"'):format(
-                            prefix,
-                            i - 1,
-                            slice[i]
-                        )
-                        break
-                    end
-                end
-            end
-            if errmsg then
-                error(('%s:%d:%d: %s'):format(source, stmt.position.line, stmt.position.col, errmsg))
-            end
-        end
-    },
-    ['require-instance'] = {
-        function(stmt, mod_, ctx_, source)
-            if 'true' ~= stmt.argument and 'false' ~= stmt.argument then
-                error(
-                    ('%s:%d:%d: invalid argument of "require-instance", must be "true" or "false"'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col
-                    )
-                )
-            end
-        end
-    },
-    revision = {},
-    ['revision-date'] = {},
-    rpc = {},
-    status = {
-        function(stmt, mod_, ctx_, source)
-            --[[ status-arg = current-keyword /
-                              obsolete-keyword /
-                              deprecated-keyword ]]
-            if 'current' ~= stmt.argument and 'obsolete' ~= stmt.argument and 'deprecated' ~= stmt.argument then
-                error(
-                    ('%s:%d:%d: invalid argument of "status", must be "current", "obsolete" or "deprecated"'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col
-                    )
-                )
-            end
-        end
-    },
-    submodule = {},
-    type = {},
-    typedef = {},
-    unique = {},
-    units = {},
-    uses = {},
-    value = {},
-    when = {},
-    ['yang-version'] = {
-        function(stmt, mod_, ctx_, source)
-            --[[yang-version-stmt    = yang-version-keyword sep yang-version-arg-str
-                                       stmtend
-                yang-version-arg-str = < a string that matches the rule >
-                                       < yang-version-arg >
-                yang-version-arg     = "1.1" ]]
-            if '1.1' ~= stmt.argument then
-                error(
-                    ('%s:%d:%d: invalid argument of "yang-version", must be "1.1"'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col
-                    )
-                )
-            end
-        end
-    },
-    ['yin-element'] = {}
-}
-
-local semantic_pass = {
-    action = {},
-    anydata = {},
-    anyxml = {},
-    argument = {},
-    augment = {},
-    base = {},
-    ['belongs-to'] = {
-        function(stmt, mod_, ctx, source)
-            if nil == ctx.modules.get(stmt.argument) then
-                error(
-                    ('%s:%d:%d: belongs-to module "%s" not found'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col,
-                        stmt.argument
-                    )
-                )
-            end
-        end
-    },
-    bit = {},
-    case = {},
-    choice = {},
-    config = {},
-    contact = {},
-    container = {},
-    default = {},
-    description = {},
-    deviate = {},
-    deviation = {},
-    enum = {},
-    ['error-app-tag'] = {},
-    ['error-message'] = {},
-    extension = {},
-    feature = {},
-    ['fraction-digits'] = {},
-    grouping = {},
-    identity = {},
-    ['if-feature'] = {},
-    import = {
-        function(stmt, mod_, ctx, source)
-            if nil == ctx.modules.get(stmt.argument) then
-                error(
-                    ('%s:%d:%d: import module "%s" not found'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col,
-                        stmt.argument
-                    )
-                )
-            end
-        end
-    },
-    include = {
-        function(stmt, mod_, ctx, source)
-            if nil == ctx.modules.get(stmt.argument) then
-                error(
-                    ('%s:%d:%d: include module "%s" not found'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col,
-                        stmt.argument
-                    )
-                )
-            end
-        end
-    },
-    input = {},
-    key = {},
-    leaf = {},
-    ['leaf-list'] = {},
-    length = {},
-    list = {},
-    mandatory = {},
-    ['max-elements'] = {},
-    ['min-elements'] = {},
-    modifier = {},
-    module = {},
-    must = {},
-    namespace = {},
-    notification = {},
-    ['ordered-by'] = {},
-    organization = {},
-    output = {},
-    path = {},
-    pattern = {},
-    position = {},
-    prefix = {},
-    presence = {},
-    range = {},
-    reference = {},
-    refine = {},
-    ['require-instance'] = {},
-    revision = {},
-    ['revision-date'] = {},
-    rpc = {},
-    status = {},
-    submodule = {},
-    type = {},
-    typedef = {},
-    unique = {},
-    units = {},
-    uses = {},
-    value = {},
-    when = {},
-    ['yang-version'] = {},
-    ['yin-element'] = {}
-}
+local syntactic_pipeline = {validate.syntactic_pass()}
+local semantic_pipeline = {validate.semantic_pass()}
 
 return {
     run_syntactic_pass = function(stmt, mod, ctx, source)
-        local passes = syntactic_pass[stmt.keyword]
-        if passes then
-            for _, pass in ipairs(passes) do
+        for _, passes in ipairs(syntactic_pipeline) do
+            local pass = passes[stmt.keyword]
+            if pass then
                 pass(stmt, mod, ctx, source)
-            end
-        else
-            -- extended-stmt pass
-            local ok, prefix, ident = utils.decouple_nodeid(stmt.keyword)
-            if ok and prefix then
-                -- seems to be a valid extended-stmt
-                local meta = ctx.modules.get_meta(mod.argument)
-                if not meta.prefixes or nil == meta.prefixes[prefix] then
+            else
+                -- extended-stmt pass
+                local ok, prefix, ident = utils.decouple_nodeid(stmt.keyword)
+                if ok and prefix then
+                    -- seems to be a valid extended-stmt
+                    local meta = ctx.modules.get_meta(mod.argument)
+                    if not meta.prefixes or nil == meta.prefixes[prefix] then
+                        error(
+                            ('%s:%d:%d: undefined prefix "%s" of keyword "%s"'):format(
+                                source,
+                                stmt.position.line,
+                                stmt.position.col,
+                                prefix,
+                                stmt.argument
+                            )
+                        )
+                    end
+                    -- well defined 'prefix'
+                    local import_stmt = meta.prefixes[prefix].parent
+                    -- parent of the prefix-stmt must be import-stmt
+                    assert('import' == import_stmt.keyword)
+                    -- have all extension modules been parsed?
+                    if not ctx.modules.extended() then
+                        -- nope, record this keyword in pending list
+                        if nil == meta.pending_extended_keywords then
+                            meta.pending_extended_keywords = {}
+                        end
+                        meta.pending_extended_keywords[#meta.pending_extended_keywords + 1] = {
+                            stmt,
+                            import_stmt.argument
+                        }
+                    else
+                        -- all the modules that had defined extension statements has been parse
+                        local def_mod = ctx.modules.get(import_stmt.argument)
+                        if nil == def_mod then
+                            -- report errors that import module does not exist
+                            error(
+                                ('%s:%d:%d: can not find import module "%s" for extended keyword "%s"'):format(
+                                    source,
+                                    stmt.position.line,
+                                    stmt.position.col,
+                                    import_stmt.argument,
+                                    stmt.argument
+                                )
+                            )
+                        end
+                        -- check the extension definitions in the import module
+                        local def_meta = ctx.modules.get_meta(import_stmt.argument)
+                        if nil == def_meta.extensions[ident] then
+                            error(
+                                ('%s:%d:%d: undefined extension "%s" from module "%s" for keyword "%s"'):format(
+                                    source,
+                                    stmt.position.line,
+                                    stmt.position.col,
+                                    ident,
+                                    import_stmt.argument,
+                                    stmt.argument
+                                )
+                            )
+                        end
+                    end
+                else
+                    -- very unlikely
                     error(
-                        ('%s:%d:%d: undefined prefix "%s" of keyword "%s"'):format(
+                        ('[internal]%s:%d:%d: invalid keyword "%s"'):format(
                             source,
                             stmt.position.line,
                             stmt.position.col,
-                            prefix,
-                            stmt.argument
+                            stmt.keyword
                         )
                     )
                 end
-                -- well defined 'prefix'
-                local import_stmt = meta.prefixes[prefix].parent
-                -- parent of the prefix-stmt must be import-stmt
-                assert('import' == import_stmt.keyword)
-                -- have all extension modules been parsed?
-                if not ctx.modules.extended() then
-                    -- nope, record this keyword in pending list
-                    if nil == meta.pending_extended_keywords then
-                        meta.pending_extended_keywords = {}
-                    end
-                    meta.pending_extended_keywords[#meta.pending_extended_keywords + 1] = {stmt, import_stmt.argument}
-                else
-                    -- all the modules that had defined extension statements has been parse
-                    local def_mod = ctx.modules.get(import_stmt.argument)
-                    if nil == def_mod then
-                        -- report errors that import module does not exist
-                        error(
-                            ('%s:%d:%d: can not find import module "%s" for extended keyword "%s"'):format(
-                                source,
-                                stmt.position.line,
-                                stmt.position.col,
-                                import_stmt.argument,
-                                stmt.argument
-                            )
-                        )
-                    end
-                    -- check the extension definitions in the import module
-                    local def_meta = ctx.modules.get_meta(import_stmt.argument)
-                    if nil == def_meta.extensions[ident] then
-                        error(
-                            ('%s:%d:%d: undefined extension "%s" from module "%s" for keyword "%s"'):format(
-                                source,
-                                stmt.position.line,
-                                stmt.position.col,
-                                ident,
-                                import_stmt.argument,
-                                stmt.argument
-                            )
-                        )
-                    end
-                end
-            else
-                -- very unlikely
-                error(
-                    ('[internal]%s:%d:%d: invalid keyword "%s"'):format(
-                        source,
-                        stmt.position.line,
-                        stmt.position.col,
-                        stmt.keyword
-                    )
-                )
             end
+        end
+    end,
+    run_semantic_pass = function(stmt, mod, ctx, source)
+        for _, passes in ipairs(semantic_pipeline) do
+            local pass = passes[stmt.keyword]
+            if pass then
+                pass(stmt, mod, ctx, source)
+            end
+            -- custom extended keywords?
         end
     end
 }

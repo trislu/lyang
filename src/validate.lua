@@ -451,7 +451,33 @@ local syntactic_pass = {
             end
         end
     },
-    submodule = {},
+    submodule = {
+        function(stmt, mod, ctx, source)
+            -- check conflict
+            local conflict = ctx.modules.get_source(mod.argument)
+            if conflict then
+                error(
+                    ('%s:%d:%d: %s name "%s" conflicts, previously defined in %s'):format(
+                        source,
+                        stmt.position.line,
+                        stmt.position.col,
+                        mod.keyword,
+                        mod.argument,
+                        conflict
+                    )
+                )
+            end
+            -- create meta fields
+            local meta = {
+                imports = {},
+                prefixes = {},
+                includes = {},
+                extensions = {}
+            }
+            -- add to modules
+            ctx.modules.add(mod, source, meta)
+        end
+    },
     type = {},
     typedef = {},
     unique = {},

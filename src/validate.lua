@@ -117,9 +117,9 @@ local syntactic_pass = {
             -- module's meta info
             local meta = ctx.modules.get_meta(mod.argument)
             -- update 'extensions' field
-            if meta.extensions[stmt.argument] then
+            local previous = meta.extensions[stmt.argument]
+            if previous then
                 -- extension redefinition
-                local previous = meta.extensions[stmt.argument]
                 error(
                     ('%s:%d:%d: extension "%s" conflict, previously defined in :%d:%d'):format(
                         source,
@@ -178,9 +178,9 @@ local syntactic_pass = {
             -- module's meta info
             local meta = ctx.modules.get_meta(mod.argument)
             -- check 'imports' field
-            if meta.imports[stmt.argument] then
+            local previous = meta.imports[stmt.argument]
+            if previous then
                 -- import conflict
-                local previous = meta.imports[stmt.argument]
                 error(
                     ('%s:%d:%d: import "%s" conflict, previously defined in :%d:%d'):format(
                         source,
@@ -201,9 +201,9 @@ local syntactic_pass = {
             -- module's meta info
             local meta = ctx.modules.get_meta(mod.argument)
             -- check 'includes' field
-            if meta.includes[stmt.argument] then
+            local previous = meta.includes[stmt.argument]
+            if previous then
                 -- include conflict
-                local previous = meta.includes[stmt.argument]
                 error(
                     ('%s:%d:%d: include "%s" conflict, previously defined in :%d:%d'):format(
                         source,

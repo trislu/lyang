@@ -34,6 +34,7 @@ return function()
             for i = 1, len do
                 table.insert(buf, string.sub(text, i, i))
             end
+            fd:close()
         end,
         loadstring = function(str)
             local len = string.len(str)

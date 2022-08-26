@@ -48,7 +48,6 @@ local syntactic_pass = {
                     errmsg = 'argument of the uses-augment statement must be a "descendant-schema-nodeid"'
                 else
                     local slice = argument:split('/')
-                    -- "" == slice[1]
                     for i = 1, #slice do
                         local ok, prefix, _ = utils.decouple_nodeid(slice[i])
                         if not ok then
@@ -56,7 +55,7 @@ local syntactic_pass = {
                             break
                         end
                         local meta = ctx.modules.get_meta(mod.argument)
-                        if nil == meta.prefixes[prefix] then
+                        if prefix and nil == meta.prefixes[prefix] then
                             errmsg =
                                 ('undefined prefix "%s" in descendant-schema-nodeid[%d]"%s"'):format(
                                 prefix,
@@ -81,7 +80,7 @@ local syntactic_pass = {
                             break
                         end
                         local meta = ctx.modules.get_meta(mod.argument)
-                        if nil == meta.prefixes[prefix] then
+                        if prefix and nil == meta.prefixes[prefix] then
                             errmsg =
                                 ('undefined prefix "%s" in absolute-schema-nodeid[%d]"%s"'):format(
                                 prefix,

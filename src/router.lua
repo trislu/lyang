@@ -24,20 +24,21 @@ SOFTWARE.
 assert(..., [[this is a require only module, don't use it as the main]])
 
 return function()
-    --[[ YANG grammar does not prevent the grouping-stmt and uses-stmt from nesting each other via uses-augment-stmt,
+    --[[ TODO:
+    YANG grammar does not prevent the grouping-stmt and uses-stmt from nesting each other via uses-augment-stmt,
     but the "circular" nesting chain MUST be avoided, cause which would result in loop definition ]]
     local gcount = 0
     local ucount = 0
     local r = {}
 
     function r.grouping_enter(uid)
-        r[#r+1] = {grouping = true, uid = uid}
+        r[#r + 1] = {'grouping@' .. uid, grouping = true, uid = uid}
         gcount = gcount + 1
     end
 
     function r.grouping_leave()
         local g = r[#r]
-
+        assert(type(g) == 'table' and g.grouping and #g == 1)
         r[#r] = nil
         gcount = gcount - 1
     end
@@ -46,38 +47,63 @@ return function()
         return gcount > 0
     end
 
-    function r.uses_enter()
-        r[#r + 1] = { uses = true }
+    function r.uses_enter(uid)
+        r[#r + 1] = {uses = true, uid = uid}
         ucount = ucount + 1
     end
 
     function r.uses_leave()
+        local u = r[#r]
+        assert(type(u) == 'table' and u.uses and #u == 0)
         r[#r] = nil
         ucount = ucount - 1
     end
 
     function r.uses()
         local cur = r[#r]
-        return cur.uses
+        return cur and cur.uses
     end
 
     function r.push(s)
-        if nested.size() > 0 then
-            local g = nested.top()
-            g.push(s)
+        local top = r[#r]
+        if top and type(top) == 'table' then
+            top[#top + 1] = s
         else
             r[#r + 1] = s
         end
     end
 
     function r.pop()
-        if gstack.size() > 0 then
-            local g = gstack.top()
-            return g.pop()
+        local top = r[#r]
+        if top and type(top) == 'table' then
+            local t = top[#top]
+            top[#top] = nil
+            return t
+        else
+            r[#r] = nil
+            return top
         end
-        local s = r[#r]
-        r[#r] = nil
-        return s
+    end
+
+    function r.concat()
+        local s = {''}
+        local depth = #r
+        local top = r[depth]
+        while top ~= nil do
+            if top and type(top) == 'table' then
+                for i = 1, #top do
+                    table.insert(s, 2, top[#top - i + 1])
+                end
+                if top.grouping then
+                    break
+                end
+            else
+                table.insert(s, 2, top)
+            end
+            depth = depth - 1
+            top = r[depth]
+        end
+        return table.concat(s, '/')
     end
 
     return r

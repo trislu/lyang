@@ -28,6 +28,7 @@ local addon = require('addon')
 local argparse = require('argparse')
 local context = require('context')
 local linker = require('linker')
+local log = require('log')
 local system = require('system')
 local parser = require('parser')
 
@@ -112,19 +113,19 @@ local function main(...)
     --[[ limits ]]
     -- converter not chosen
     if not ctx.args.cov then
-        error('converter not chosen')
+        log.error('converter not chosen')
     end
     -- converter not found
     local cov = ctx.converters.get(ctx.args.cov[1])
     if not cov then
-        error('unknown converter "' .. ctx.args.cov[1] .. '"')
+        log.error('unknown converter "' .. ctx.args.cov[1] .. '"')
     end
     -- number of input files
     local files = ctx.args
     if 0 == #files then
-        error('missing input files')
+        log.error('missing input files')
     elseif 1 < #files and not cov.multiple then
-        error('too many files to convert')
+        log.error('too many files to convert')
     end
 
     --[[ core ]]
@@ -139,7 +140,7 @@ local function main(...)
             local p = parser(ctx)
             local err = p.parse(ctx.args.extend[i])
             if err then
-                error(err)
+                log.error(err)
             end
         end
     end
@@ -150,13 +151,13 @@ local function main(...)
         local p = parser(ctx)
         local err = p.parse(files[i])
         if err then
-            error(err)
+            log.error(err)
         end
     end
     -- if the "linker" mode is enbaled
     if ctx.args.link then
         if not cov.multiple then
-            error('only the multi-module converters can enable the linker mode')
+            log.error('only the multi-module converters can enable the linker mode')
         end
         local l = linker()
         l.link(ctx)
@@ -172,13 +173,12 @@ local function main(...)
                 cov:convert(ctx, fd)
             end,
             function()
-                print('???')
                 fd:close()
                 os.remove(tmpname)
             end
         )
         if not ok then
-            error(errmsg)
+            log.error(errmsg)
         end
         fd:close()
         -- try os.rename() firstly

@@ -60,6 +60,7 @@ local function create_nfa(ctx)
     function nfa:load(f)
         local buf = buffer()
         buf.load(f)
+        self.filename = f
         self.lexer = lex(buf)
     end
 

@@ -36,6 +36,12 @@ If something is slow or heavy, implements it in C.
 ```
 I.e. if any functionalities of lyang were considered to be "*performance-sensitive*", you could always customize them with [Lua C API](http://www.lua.org/manual/5.1/manual.html#3) or [LuaJIT FFI Library](http://luajit.org/ext_ffi.html), to reduce the execution time and memory consumption.
 
+## Docker dev
+```bash
+docker build -t lyang:dev -f Dockerfile .
+docker run -v ${pwd}:/workspace -it --rm lyang:dev /bin/sh
+```
+
 ## Usage
 
 ```bash

@@ -1,6 +1,13 @@
 #!/usr/bin/env lua
-loca = load or loadstring
-unpack = unpack or table.unpack --luacheck: ignore
+local load = load or loadstring
+local unpack = unpack or table.unpack --luacheck: ignore
+local error = error
+local os = os
+local pcall = pcall
+local print = print
+local require = require
+local table = table
+local io = io
 --[[
 MIT License
 
@@ -28,9 +35,13 @@ local addon = require('addon')
 local argparse = require('argparse')
 local context = require('context')
 local linker = require('linker')
-local log = require('log')
 local system = require('system')
 local parser = require('parser')
+
+local _ENV = {}
+if setfenv then
+    setfenv(1, _ENV)
+end
 
 local function main(...)
     -- create context
@@ -105,7 +116,7 @@ local function main(...)
     ctx.args = ap.parse_args {...}
 
     -- print help
-    if ctx.args.help then
+    if not ctx.args or ctx.args.help then
         ap.print_usage()
         os.exit(0)
     end
@@ -113,19 +124,19 @@ local function main(...)
     --[[ limits ]]
     -- converter not chosen
     if not ctx.args.cov then
-        log.error('converter not chosen')
+        error('converter not chosen')
     end
     -- converter not found
     local cov = ctx.converters.get(ctx.args.cov[1])
     if not cov then
-        log.error('unknown converter "' .. ctx.args.cov[1] .. '"')
+        error('unknown converter "' .. ctx.args.cov[1] .. '"')
     end
     -- number of input files
     local files = ctx.args
     if 0 == #files then
-        log.error('missing input files')
+        error('missing input files')
     elseif 1 < #files and not cov.multiple then
-        log.error('too many files to convert')
+        error('too many files to convert')
     end
 
     --[[ core ]]
@@ -140,7 +151,7 @@ local function main(...)
             local p = parser(ctx)
             local err = p.parse(ctx.args.extend[i])
             if err then
-                log.error(err)
+                error(err)
             end
         end
     end
@@ -151,13 +162,13 @@ local function main(...)
         local p = parser(ctx)
         local err = p.parse(files[i])
         if err then
-            log.error(err)
+            error(err)
         end
     end
     -- if the "linker" mode is enbaled
     if ctx.args.link then
         if not cov.multiple then
-            log.error('only the multi-module converters can enable the linker mode')
+            error('only the multi-module converters can enable the linker mode')
         end
         local l = linker()
         l.link(ctx)
@@ -178,7 +189,7 @@ local function main(...)
             end
         )
         if not ok then
-            log.error(errmsg)
+            error(errmsg)
         end
         fd:close()
         -- try os.rename() firstly

@@ -87,9 +87,13 @@ return function()
             end
         end,
         parse_args = function(arglist)
+            local argcnt = #arglist
+            if argcnt == 0 then
+                return nil
+            end
             local result = {}
             local index = 1
-            while index <= #arglist do
+            while index <= argcnt do
                 local _arg = arglist[index]
                 -- search if '_arg' is a valid option name
                 local option = option_search_table[_arg]

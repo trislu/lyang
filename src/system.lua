@@ -23,7 +23,17 @@ SOFTWARE.
 ]]
 assert(..., [[this is a require only module, don't use it as the main]])
 
+local package = package
+local error = error
+local tostring = tostring
+local io = io
+local os = os
 local readonly = require('readonly')
+
+local _ENV = {}
+if setfenv then
+    setfenv(1, _ENV)
+end
 
 local _type = nil
 
@@ -37,7 +47,7 @@ elseif '/' == _sep then
     _type = _UNIX
 else
     -- statements
-    error('[system] unknown sep character = ', _sep)
+    error('[system] unknown sep character = ' .. tostring(_sep))
 end
 
 return readonly {
@@ -60,7 +70,7 @@ return readonly {
         elseif _UNIX == _type then
             cmd = ("find '%s' -mindepth 1 -maxdepth 1 -type f -print"):format(path)
         else
-            error('[system] unknown system type =', _type)
+            error('[system] unknown system type =' .. tostring(_type))
         end
         --check https://www.lua.org/manual/5.1/manual.html#pdf-io.popen
         local pret = io.popen(cmd, 'r')

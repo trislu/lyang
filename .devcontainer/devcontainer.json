@@ -23,6 +23,8 @@
                 "ms-vscode.makefile-tools",
                 "EditorConfig.EditorConfig",
                 "liwangqian.luacoderassist",
+                "GitHub.vscode-pull-request-github",
+                "eamodio.gitlens",
                 "ms-vscode.cpptools-extension-pack"
             ]
         }

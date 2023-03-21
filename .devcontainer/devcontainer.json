@@ -25,6 +25,7 @@
                 "liwangqian.luacoderassist",
                 "GitHub.vscode-pull-request-github",
                 "eamodio.gitlens",
+                "tomblind.local-lua-debugger-vscode",
                 "ms-vscode.cpptools-extension-pack"
             ]
         }

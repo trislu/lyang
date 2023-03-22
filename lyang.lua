@@ -31,10 +31,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
+package.path = package.path .. ';src/?.lua;addons/?.lua;;'
+
 local addon = require('addon')
 local argparse = require('argparse')
 local context = require('context')
 local linker = require('linker')
+local log = require('log')
 local system = require('system')
 local parser = require('parser')
 
@@ -74,7 +77,6 @@ local function main(...)
         '-o',
         '--output',
         action = 'store',
-        nargs = 1,
         dest = 'output',
         help = 'Save output to file'
     }
@@ -90,7 +92,6 @@ local function main(...)
         '-c',
         '--convert',
         action = 'store',
-        nargs = 1,
         dest = 'cov',
         help = 'Choose a converter. \n\t\tSupported converters are: ' ..
             table.concat(
@@ -111,32 +112,45 @@ local function main(...)
         dest = 'link',
         help = 'Enable the linker mode'
     }
+    ap.add_argument {
+        '-p',
+        '--path',
+        action = 'store',
+        dest = 'path',
+        help = 'Loading path of yang files.'
+    }
 
     -- do parse arguments
-    ctx.args = ap.parse_args {...}
+    local arguments = ap.parse_args {...}
 
     -- print help
-    if not ctx.args or ctx.args.help then
+    if not arguments or arguments.help then
         ap.print_usage()
         os.exit(0)
     end
 
     --[[ limits ]]
     -- converter not chosen
-    if not ctx.args.cov then
+    if not arguments.cov then
         error('converter not chosen')
     end
     -- converter not found
-    local cov = ctx.converters.get(ctx.args.cov[1])
+    local cov = ctx.converters.get(arguments.cov)
     if not cov then
-        error('unknown converter "' .. ctx.args.cov[1] .. '"')
+        error('unknown converter "' .. arguments.cov .. '"')
     end
     -- number of input files
-    local files = ctx.args
-    if 0 == #files then
-        error('missing input files')
-    elseif 1 < #files and not cov.multiple then
-        error('too many files to convert')
+    local positional_argument_count = #arguments
+    if 0 == positional_argument_count then
+        --error('missing input files')
+    elseif 1 < positional_argument_count and not cov.multiple then
+        --error('too many files to convert')
+    end
+
+    -- input files
+    local files = {}
+    for i = 0, positional_argument_count do
+        files[#files + 1] = arguments[i]
     end
 
     --[[ core ]]
@@ -146,16 +160,26 @@ local function main(...)
     end
 
     -- extend modules
-    if ctx.args.extend then
-        for i = 0, #ctx.args.extend do
+    if arguments.extend then
+        for i = 0, #arguments.extend do
             local p = parser(ctx)
-            local err = p.parse(ctx.args.extend[i])
+            local err = p.parse(arguments.extend[i])
             if err then
                 error(err)
             end
         end
     end
     ctx.modules.do_extend()
+
+    -- loading path or positional argument?
+    if arguments.path then
+        for file in system.dir(arguments.path) do
+            local ret = system.path.splitext(file)
+            if '.yang' == ret[2] then
+                files[#files + 1] = file
+            end
+        end
+    end
 
     -- input modules
     for i = 1, #files do
@@ -193,10 +217,10 @@ local function main(...)
         end
         fd:close()
         -- try os.rename() firstly
-        local success, _ = os.rename(tmpname, ctx.args.output[1])
+        local success, _ = os.rename(tmpname, ctx.args.output)
         if not success then
             -- use os.execute('mv source destination') secondly
-            system.move(tmpname, ctx.args.output[1])
+            system.move(tmpname, ctx.args.output)
         end
     else
         -- write to stdout by default

@@ -507,7 +507,27 @@ local substmt_syntax = {
             reference = {'?'},
             status = {'?'}
         }
-    end
+    end,
+    when = function()
+        return {
+            description = {'?'},
+            reference = {'?'}
+        }
+    end,
+    refine = function()
+        return {
+            ['if-feature'] = {'*'},
+            must = {'*'},
+            presence = {'?'},
+            default = {'*'},
+            config = {'?'},
+            mandatory = {'?'},
+            ['max-elements'] = {'?'},
+            ['min-elements'] = {'?'},
+            description = {'?'},
+            reference = {'?'}
+        }
+    end,
 }
 
 local yinstmt_syntax = {

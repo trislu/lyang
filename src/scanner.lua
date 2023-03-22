@@ -23,6 +23,7 @@ SOFTWARE.
 ]]
 assert(..., [[this is a require only module, don't use it as the main]])
 
+local log = require('log')
 local token = require('token')
 
 local _single_char_token = {
@@ -81,9 +82,15 @@ return function(buf)
             con = cur
         end,
         make_string_token = function(t)
-            return token.new(t, buffer.sub(con, cur), line, column)
+            -- is quoted?
+            local quoted = (t == token.DQSTR or t == token.SQSTR)
+            -- remove quotes
+            local content = (quoted and buffer.sub(con+1, cur-1) or buffer.sub(con, cur))
+            log.debug("emit string token: %s", content)
+            return token.new(t, content, line, column)
         end,
         make_character_token = function(c)
+            log.debug("emit character token: %s", c)
             return token.new(_single_char_token[c], c, line, column)
         end
     }

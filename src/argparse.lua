@@ -109,6 +109,7 @@ return function()
                     elseif action == 'store' or action == nil then
                         -- parse nargs
                         local nargs = {}
+                        -- todo: consume arugments based on nargs
                         -- repeat parse next arguments
                         while (index + 1 <= #arglist) and (not string.match(arglist[index + 1], '^(%-%-?)[^%-]+')) do
                             nargs[#nargs + 1] = arglist[index + 1]
@@ -139,7 +140,8 @@ return function()
                                 error('option "' .. _arg .. '" invalid nargs ' .. option.nargs)
                             end
                         else
-                            error('option "' .. _arg .. '" claims store without nargs')
+                            -- error('option "' .. _arg .. '" claims store without nargs')
+                            nargs = nargs[1]
                         end
                         result[option.dest] = nargs
                     end

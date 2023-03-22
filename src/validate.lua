@@ -42,9 +42,10 @@ local syntactic_pass = {
         function(stmt, mod, ctx, source)
             local argument = stmt.argument
             local errmsg = nil
+            local start_char = argument:sub(1, 1)
             if 'uses' == stmt.parent.keyword then
                 -- 'uses-augment-stmt'
-                if '/' == argument[1] then
+                if '/' == start_char then
                     errmsg = 'argument of the uses-augment statement must be a "descendant-schema-nodeid"'
                 else
                     local slice = argument:split('/')
@@ -68,7 +69,7 @@ local syntactic_pass = {
                 end
             else
                 -- 'augment-stmt'
-                if '/' ~= argument[1] then
+                if '/' ~= start_char then
                     errmsg = 'argument of the augment statement must be an "absolute-schema-nodeid"'
                 else
                     local slice = argument:split('/')
@@ -145,8 +146,8 @@ local syntactic_pass = {
             local tokens = utils.tokenize_feature_expr(stmt.argument)
             for _, tk in ipairs(tokens) do
                 -- not a reserve token
-                if nil ~= feature_rsv_tokens[tk] then
-                    local ok, prefix, _ = utils.decouple_nodeid(stmt.keyword)
+                if not feature_rsv_tokens[tk] then
+                    local ok, prefix, _ = utils.decouple_nodeid(tk)
                     if not ok then
                         error(
                             ('%s:%d:%d: invalid if-feature argument "%s"'):format(
@@ -158,7 +159,7 @@ local syntactic_pass = {
                         )
                     end
                     local meta = ctx.modules.get_meta(mod.argument)
-                    if nil == meta.prefixes[prefix] then
+                    if prefix and nil == meta.prefixes[prefix] then
                         error(
                             ('%s:%d:%d: undefined prefix "%s" in if-feature argument "%s"'):format(
                                 source,
@@ -320,6 +321,8 @@ local syntactic_pass = {
     path = {
         function(stmt, mod, ctx, source)
             local argument = stmt.argument
+            -- todo: implement an xpath tokenizer
+            --[[
             local slice = argument:split('/')
             local errmsg = nil
             for i = 1, #slice do
@@ -331,15 +334,16 @@ local syntactic_pass = {
                         break
                     end
                     local meta = ctx.modules.get_meta(mod.argument)
-                    if nil == meta.prefixes[prefix] then
+                    if prefix and nil == meta.prefixes[prefix] then
                         errmsg = ('undefined prefix "%s" in path[%d]"%s"'):format(prefix, i - 1, slice[i])
                         break
                     end
                 end
             end
             if errmsg then
-                error(('%s:%d:%d: %s'):format(source, stmt.position.line, stmt.position.col))
+                error(('%s:%d:%d: %s'):format(source, stmt.position.line, stmt.position.col, errmsg))
             end
+            ]]
         end
     },
     pattern = {},
@@ -388,9 +392,10 @@ local syntactic_pass = {
     refine = {
         function(stmt, mod, ctx, source)
             local argument = stmt.argument
+            local start_char = argument:sub(1,1)
             local errmsg = nil
             -- 'uses-augment-stmt'
-            if '/' == argument[1] then
+            if '/' == start_char then
                 errmsg = 'argument of the uses-augment statement must be a "descendant-schema-nodeid"'
             else
                 local slice = argument:split('/')
@@ -402,7 +407,7 @@ local syntactic_pass = {
                         break
                     end
                     local meta = ctx.modules.get_meta(mod.argument)
-                    if nil == meta.prefixes[prefix] then
+                    if prefix and nil == meta.prefixes[prefix] then
                         errmsg =
                             ('undefined prefix "%s" in descendant-schema-nodeid[%d]"%s"'):format(
                             prefix,

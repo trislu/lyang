@@ -50,7 +50,7 @@ return {
                                 stmt.position.line,
                                 stmt.position.col,
                                 prefix,
-                                stmt.argument
+                                stmt.keyword
                             )
                         )
                     end

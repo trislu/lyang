@@ -50,13 +50,6 @@ local function create_nfa(ctx)
         context = ctx
     }
 
-    local trace = function(...)
-        -- TODO: debug level
-        if ctx.args and 'debug' == ctx.args.mode then
-            return print(...)
-        end
-    end
-
     function nfa:load(f)
         local buf = buffer()
         buf.load(f)
@@ -84,7 +77,6 @@ local function create_nfa(ctx)
     end
 
     function nfa:init()
-        trace('nfa:init()')
         assert(nil == self.cur_token)
         self.cur_token = self.lexer.next_token()
         if nil == self.cur_token then
@@ -102,7 +94,6 @@ local function create_nfa(ctx)
 
     --[[meet keyword]]
     function nfa:meet_keyword()
-        trace('nfa:meet_keyword()')
         -- clear argument string cache
         self.argument_string = {}
         -- already in extension tree
@@ -168,7 +159,6 @@ local function create_nfa(ctx)
 
     --[[meet extension]]
     function nfa:meet_extension()
-        trace('nfa:meet_extension()')
         -- create statement
         local stmt = statement(self.cur_token.content)
         stmt.position.line = self.cur_token.line
@@ -203,7 +193,6 @@ local function create_nfa(ctx)
 
     --[[meet unquoted argument]]
     function nfa:meet_unquoted_argument()
-        trace('nfa:meet_unquoted_argument()')
         -- assign argument string
         local stmt = self.stmt_stack.top()
         stmt.argument = self.cur_token.content
@@ -222,7 +211,6 @@ local function create_nfa(ctx)
 
     --[[meet quoted argument]]
     function nfa:meet_quoted_argument()
-        trace('nfa:meet_quoted_argument()')
         -- argument of which stmt
         local stmt = self.stmt_stack.top()
         -- cache argument string
@@ -249,7 +237,6 @@ local function create_nfa(ctx)
 
     --[[concat quoted argument]]
     function nfa:concat_quoted_argument()
-        trace('nfa:concat_quoted_argument()')
         -- read next token
         self.cur_token = self.lexer.next_token()
         -- luacheck: ignore
@@ -263,7 +250,6 @@ local function create_nfa(ctx)
 
     --[[begin substatement]]
     function nfa:begin_substatement()
-        trace('nfa:begin_substatement()')
         -- run syntatic pass for this statement
         pass.run_syntactic_pass(self.stmt_stack.top(), self.stmt_stack.bottom(), self.context, self.filename)
         -- read next token
@@ -290,7 +276,6 @@ local function create_nfa(ctx)
     end
     -- [[end substatement]]
     function nfa:end_substatement()
-        trace('nfa:end_substatement()')
         if self.extension_root then
             --[[TOOD:verify extension syntax?]]
             if self.extension_root == self.stmt_stack.size() then
@@ -322,7 +307,6 @@ local function create_nfa(ctx)
 
     -- [[end statement]]
     function nfa:end_statement()
-        trace('nfa:end_statement()')
         -- run syntatic pass for this statement
         pass.run_syntactic_pass(self.stmt_stack.top(), self.stmt_stack.bottom(), self.context, self.filename)
         if self.extension_root then

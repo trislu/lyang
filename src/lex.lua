@@ -25,6 +25,7 @@ assert(..., [[this is a require only module, don't use it as the main]])
 
 local token = require('token')
 local scanner = require('scanner')
+local log = require('log')
 
 local CRLF = {
     ['\r'] = 1,
@@ -119,8 +120,7 @@ return function(buffer)
             state.qstring = function()
                 -- record head quote
                 local quote = s.next()
-                -- skip head quote
-                s.next()
+                -- consume to head quote
                 s.consume()
                 --[[ TODO: trim whitespace and linebreak
                     Ch6.1.3 of [rfc7950](https://www.rfc-editor.org/rfc/rfc7950.html)
@@ -151,7 +151,8 @@ return function(buffer)
                     The backslash MUST NOT be followed by any other character.
                 ]]
                 local next_state = state.void
-                while true do
+                local current = s.next()
+                while current ~= quote do
                     local ch = s.peek()
                     if nil == ch then
                         -- reach EOF
@@ -163,15 +164,10 @@ return function(buffer)
                         if s.peek() then
                             s.next()
                         end
-                    elseif quote == ch then
-                        -- quote back
-                        break
                     end
-                    s.next()
+                    current = s.next()
                 end
                 local tk = ('"' == quote) and s.make_string_token(token.DQSTR) or s.make_string_token(token.SQSTR)
-                -- skip tail quote
-                s.next()
                 return next_state, tk
             end
             -- [line comment]

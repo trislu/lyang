@@ -163,7 +163,9 @@ local function main(...)
     if arguments.extend then
         for i = 0, #arguments.extend do
             local p = parser(ctx)
-            local err = p.parse(arguments.extend[i])
+            local fd = io.open(arguments.extend[i], 'r')
+            local text = fd:read('*a')
+            local err = p.parse(text)
             if err then
                 error(err)
             end
@@ -183,8 +185,10 @@ local function main(...)
 
     -- input modules
     for i = 1, #files do
+        local fd = io.open(files[i], 'r')
+        local text = fd:read('*a')
         local p = parser(ctx)
-        local err = p.parse(files[i])
+        local err = p.parse(text)
         if err then
             error(err)
         end

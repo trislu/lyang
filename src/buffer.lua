@@ -26,16 +26,6 @@ assert(..., [[this is a require only module, don't use it as the main]])
 return function()
     local buf = nil
     local b = {
-        load = function(filename)
-            local fd = io.open(filename, 'r')
-            local text = fd:read('*a')
-            local len = string.len(text)
-            buf = {}
-            for i = 1, len do
-                table.insert(buf, string.sub(text, i, i))
-            end
-            fd:close()
-        end,
         loadstring = function(str)
             local len = string.len(str)
             buf = {}

@@ -50,13 +50,6 @@ local function create_nfa(ctx)
         context = ctx
     }
 
-    function nfa:load(f)
-        local buf = buffer()
-        buf.load(f)
-        self.filename = f
-        self.lexer = lex(buf)
-    end
-
     function nfa:loadstring(s)
         local buf = buffer()
         buf.loadstring(s)
@@ -349,12 +342,7 @@ end
 
 return function(ctx)
     local p = {
-        parse = function(f)
-            local nfa = create_nfa(ctx)
-            nfa:load(f)
-            return nfa:run()
-        end,
-        parse_string = function(s)
+        parse = function(s)
             local nfa = create_nfa(ctx)
             nfa:loadstring(s)
             return nfa:run()

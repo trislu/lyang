@@ -28,7 +28,7 @@ local token = lex.token
 
 local function emit_error(state, err)
     local errs = state.errs
-    errs[#errs+1] = err
+    errs[#errs + 1] = err
 end
 
 local function get_current_token(state)
@@ -39,14 +39,18 @@ local function consume_current_token(state)
     state.index = state.index + 1
 end
 
-local parse_until_valid(state, valid_states)
+local function parse_invalid(state)
+    -- can't match valid operation
+end
+
+local function parse_until_valid(state, valid_states)
     -- go to next state
-    local token_type
+    local token_type, content, row, col
     while state.index < #state.tokens do
-        token_type, content, row, col = table.unpack(get_current_token(state))
-        local next = valid_states[token_type]
-        if next then
-            return next
+        token_type, content, row, col = unpack(get_current_token(state))
+        local operation = valid_states[token_type]
+        if operation then
+            return operation
         end
         -- todo: emit error for unexpected token
         emit_error(state, {
@@ -60,12 +64,12 @@ local parse_until_valid(state, valid_states)
         -- consume unexpected token
         consume_current_token(state)
     end
-    return nil
+    return parse_invalid
 end
 
 local parse_keyword_next = {}
 local parse_keyword = function(state)
-    local _, content, row, col = table.unpack(get_current_token(state))
+    local _, content, row, col = unpack(get_current_token(state))
     -- emit statement
     local stmt = {
         keyword = content,
@@ -87,13 +91,13 @@ end
 
 local parse_argument_next = {}
 local parse_argument = function(state)
-    local _, content = table.unpack(get_current_token(state))
+    local _, content = unpack(get_current_token(state))
     -- current stmt
     local cur_stmt = state.stmt_stack[#state.stmt_stack]
     -- update argument
     if cur_stmt.argument then
         -- concat argument string
-        cur_stmt.argument = cur_stmt.argument..content
+        cur_stmt.argument = cur_stmt.argument .. content
     else
         cur_stmt.argument = content
     end
@@ -198,9 +202,9 @@ return function(str)
     }
 
     -- do parse
-    local next = parse_keyword
-    while next do
-        next = next(state)
+    local operation = parse_keyword
+    while operation ~= parse_invalid do
+        operation = operation(state)
     end
 
     local result = {

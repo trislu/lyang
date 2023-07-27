@@ -56,10 +56,10 @@ local token = {
 }
 
 local RSVCHARS = {
-    [';'] = token[SCOLON],
-    ['{'] = token[LBRACE],
-    ['}'] = token[RBRACE],
-    ['+'] = token[PLUS]
+    [';'] = token[token.SCOLON],
+    ['{'] = token[token.LBRACE],
+    ['}'] = token[token.RBRACE],
+    ['+'] = token[token.PLUS]
 }
 
 local scanner = function(str)
@@ -115,16 +115,16 @@ local scanner = function(str)
         end,
         -- emit tokens
         emit_unquoted_string = function()
-            return {token[UQSTR], chk.sub(con, cur), row, col}
+            return { token[token.UQSTR], chk.sub(con, cur), row, col }
         end,
         emit_single_quoted_string = function()
-            return {token[SQSTR], chk.sub(con + 1, cur - 1), row, col}
+            return { token[token.SQSTR], chk.sub(con + 1, cur - 1), row, col }
         end,
         emit_double_quoted_string = function()
-            return {token[DQSTR], chk.sub(con + 1, cur - 1), row, col}
+            return { token[token.DQSTR], chk.sub(con + 1, cur - 1), row, col }
         end,
         emit_character = function(c)
-            return {RSVCHARS[c], c, row, col}
+            return { RSVCHARS[c], c, row, col }
         end
     }
     return s
@@ -133,12 +133,16 @@ end
 -- [lexer state]
 local state = {}
 
+-- [invalid]
+state.invalid = function(s)
+end
+
 -- [void]
 state.void = function(s)
     local ch = s.peek()
     if nil == ch then
         -- EOS
-        return nil
+        return state.invalid
     elseif CRLF[ch] then
         s.next()
         return state.void
@@ -177,7 +181,7 @@ state.uqstring = function(s)
         ch = s.peek()
         if nil == ch then
             -- reach EOF
-            return nil, s.emit_unquoted_string()
+            return state.invalid, s.emit_unquoted_string()
         elseif SEP[ch] or CRLF[ch] or RSVCHARS[ch] or "'" == ch or '"' == ch then
             return state.void, s.emit_unquoted_string()
         else
@@ -226,7 +230,7 @@ state.qstring = function(s)
         local ch = s.peek()
         if nil == ch then
             -- reach EOF
-            next_state = nil
+            next_state = state.invalid
         elseif '\\' == ch then
             -- skip backslash
             s.next()
@@ -250,7 +254,7 @@ state.lcomment = function(s)
         end
         ch = s.next()
     end
-    return nil
+    return state.invalid
 end
 
 -- [block comment]
@@ -270,7 +274,7 @@ state.bcomment = function(s)
         p2 = s.peek2()
     end
     -- tailing garbage
-    return nil
+    return state.invalid
 end
 
 return {
@@ -281,11 +285,11 @@ return {
         -- emit tokens
         local results = {}
         local next_state = state.void
-        local token
-        while next_state do
-            next_state, token = next_state(s)
-            if token ~= nil then
-                results[#results + 1] = token
+        local tk
+        while next_state ~= state.invalid do
+            next_state, tk = next_state(s)
+            if tk ~= nil then
+                results[#results + 1] = tk
             end
         end
         return results
